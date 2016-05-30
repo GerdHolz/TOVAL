@@ -14,6 +14,7 @@ import de.invation.code.toval.file.FileWriter;
 import de.invation.code.toval.math.CombinationsCalculator;
 import de.invation.code.toval.math.Permutations;
 import de.invation.code.toval.types.HashList;
+import de.invation.code.toval.validate.Validate;
 
 public class ListUtils {
 
@@ -462,14 +463,10 @@ public class ListUtils {
 	 * @return A sublist with exactly <code>count</code> elements
 	 */
 	public static <T> List<T> getRandomSublist(List<T> list, int count) {
-		List<T> result = new ArrayList<>();
+		Validate.smallerEqual(count, list.size());
 		List<T> opSet = new ArrayList<>(list);
-		while (result.size() < count) {
-			int next = rand.nextInt(opSet.size());
-			result.add(opSet.get(next));
-			opSet.remove(next);
-		}
-		return result;
+		Collections.shuffle(opSet);
+		return ListUtils.copyOfRange(opSet, 0, count-1);
 	}
 
 	/**

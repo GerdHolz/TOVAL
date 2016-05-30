@@ -199,6 +199,7 @@ public class ArrayUtils {
 
 	/**
 	 * Checks if the given array contains the specified value.<br>
+	 * This method works with strict reference comparison.
 	 * 
 	 * @param <T>
 	 *            Type of array elements and <code>value</code>
@@ -209,7 +210,7 @@ public class ArrayUtils {
 	 * @return <code>true</code> if <code>array</code> contains
 	 *         <code>value</code>, <code>false</code> otherwise
 	 */
-	public static <T> boolean arrayContains(T[] array, T value) {
+	public static <T> boolean arrayContainsRef(T[] array, T value) {
 		for (int i = 0; i < array.length; i++) {
 			if (array[i] == value) {
 				return true;
@@ -218,6 +219,28 @@ public class ArrayUtils {
 		return false;
 	}
 
+	/**
+	 * Checks if the given array contains the specified value.<br>
+	 * This method works with the equals method.
+	 * 
+	 * @param <T>
+	 *            Type of array elements and <code>value</code>
+	 * @param array
+	 *            Array to examine
+	 * @param value
+	 *            Value to search
+	 * @return <code>true</code> if <code>array</code> contains
+	 *         <code>value</code>, <code>false</code> otherwise
+	 */
+	public static <T> boolean arrayContainsEq(T[] array, T value) {
+		for (int i = 0; i < array.length; i++) {
+			if (array[i].equals(value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Divides the given array using the boundaries in <code>cuts</code>.<br>
 	 * Cuts are interpreted in an inclusive way, which means that a single cut
