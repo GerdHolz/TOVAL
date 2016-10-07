@@ -156,27 +156,27 @@ public class RestrictedTextField extends JTextField {
 		NOT_EMPTY, NONE;
 	}
 	
-	public static void main(String[] args) {
-		DummyPanel panel = new DummyPanel();
-		RestrictedTextField t1 = new RestrictedTextField(Restriction.POSITIVE_INTEGER, "20");
-		t1.setPreferredSize(new Dimension(200, 20));
-		t1.addListener(panel);
-		t1.setValidateOnTyping(true);
-		RestrictedTextField t2 = new RestrictedTextField(Restriction.POSITIVE_DOUBLE, "20.5");
-		panel.add(t1);
-		panel.add(t2);
-		new DisplayFrame(panel, true);
-	}
-	
-	private static class DummyPanel extends JPanel implements RestrictedTextFieldListener {
-
-		@Override
-		public void valueChanged(String oldValue, String newValue) {
-			System.out.println("old value: " + oldValue);
-			System.out.println("new value: " + newValue);
-			System.out.println();
-		}
-		
-	}
+//	public static void main(String[] args) {
+//		DummyPanel panel = new DummyPanel();
+//		RestrictedTextField t1 = new RestrictedTextField(Restriction.POSITIVE_INTEGER, "20");
+//		t1.setPreferredSize(new Dimension(200, 20));
+//		t1.addListener(panel);
+//		t1.setValidateOnTyping(true);
+//		RestrictedTextField t2 = new RestrictedTextField(Restriction.POSITIVE_DOUBLE, "20.5");
+//		panel.add(t1);
+//		panel.add(t2);
+//		new DisplayFrame(panel, true);
+//	}
+//	
+//	private static class DummyPanel extends JPanel implements RestrictedTextFieldListener {
+//
+//		@Override
+//		public void valueChanged(String oldValue, String newValue) {
+//			System.out.println("old value: " + oldValue);
+//			System.out.println("new value: " + newValue);
+//			System.out.println();
+//		}
+//		
+//	}
 
 }

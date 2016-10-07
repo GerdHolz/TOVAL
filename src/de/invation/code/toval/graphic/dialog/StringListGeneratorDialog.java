@@ -79,7 +79,6 @@ public class StringListGeneratorDialog extends AbstractDialog<List<String>> {
 		return result;
 	}
 	
-	
 	public static List<String> showDialog(Window owner, String title) throws Exception{
 		StringListGeneratorDialog dialog = new StringListGeneratorDialog(owner, title);
 		dialog.setUpGUI();

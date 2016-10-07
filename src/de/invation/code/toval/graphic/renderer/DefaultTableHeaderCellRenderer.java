@@ -19,8 +19,6 @@ import javax.swing.table.JTableHeader;
  * <P>
  * To apply any desired customization, DefaultTableHeaderCellRenderer may be
  * suitably extended.
- * 
- * @author Darryl
  */
 public class DefaultTableHeaderCellRenderer extends DefaultTableCellRenderer {
 	

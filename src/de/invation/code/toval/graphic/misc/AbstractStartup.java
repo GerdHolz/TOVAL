@@ -1,8 +1,8 @@
 package de.invation.code.toval.graphic.misc;
 
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.os.OSType;
 import de.invation.code.toval.os.OSUtils;
-import de.invation.code.toval.validate.ExceptionDialog;
 
 public abstract class AbstractStartup {
 

@@ -1,4 +1,4 @@
-package de.invation.code.toval.validate;
+package de.invation.code.toval.graphic.dialog;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -8,23 +8,24 @@ import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-
-import de.invation.code.toval.graphic.dialog.StringDialog;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.SwingConstants;
+
+import de.invation.code.toval.graphic.component.ContentSensitiveTextPane;
+import de.invation.code.toval.validate.Validate;
 
 public class ExceptionDialog extends JDialog {
 
@@ -32,7 +33,8 @@ public class ExceptionDialog extends JDialog {
 
     public static final boolean DEFAULT_CONCAT_CAUSE_MESSAGES = false;
     private static final Dimension MIN_DIMENSION = new Dimension(400, 200);
-    public static final boolean DEFAULT_STACK_TRACE_OPTION = true;
+    private static final Dimension PREFERRED_SIZE_STACK_TRACE_DIALOG = new Dimension(800, 800);
+    public static final boolean DEFAULT_STACK_TRACE_OPTION = false;
 
     private JPanel panelButtons;
     private JButton btnStackTrace;
@@ -50,6 +52,8 @@ public class ExceptionDialog extends JDialog {
         this.stackTraceOption = stackTraceOption;
         setUpGUI(owner);
     }
+    
+    
 
     private void setUpGUI(Window owner){
         this.setResizable(true);
@@ -128,7 +132,9 @@ public class ExceptionDialog extends JDialog {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        StringDialog.showDialog(ExceptionDialog.this, "Stack Trace", getStackTrace(), false);
+                    	StringDialog dialog = new StringDialog(ExceptionDialog.this, "Stack Trace", getStackTrace(), false);
+                    	dialog.setPreferredSize(PREFERRED_SIZE_STACK_TRACE_DIALOG);
+                    	dialog.setUpGUI();
                     } catch (Exception e1) {
                         JOptionPane.showMessageDialog(ExceptionDialog.this, "Cannot launch StringDialog.\nReason: " + e1.getMessage(), "Internal Exception", JOptionPane.ERROR_MESSAGE);
                     }
@@ -180,21 +186,34 @@ public class ExceptionDialog extends JDialog {
                 messages.add(cause.getMessage());
             }
         }
-        JTextArea area = new JTextArea();
-        area.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
-        area.setBackground(ExceptionDialog.this.getBackground());
+        ContentSensitiveTextPane textPane = new ContentSensitiveTextPane();
+        textPane.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+        textPane.setBackground(ExceptionDialog.this.getBackground());
+        StringBuilder builder = new StringBuilder();
         for (String message : messages) {
-            area.append(message);
-            area.append("\n");
+            builder.append(message);
+            builder.append("<br>");
         }
-        area.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(area);
+        textPane.setEditable(false);
+        textPane.setContent(builder.toString());
+        JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setBorder(null);
         return scrollPane;
     }
     
     public static void main(String[] args) {
-        ExceptionDialog.showException("titl", new Exception("fatal"));
+    	List list = Arrays.asList("eins", "zwei");
+    	try {
+    		List<Integer> list2 = (List<Integer>) list;
+    		Integer value = list2.get(0);
+    	} catch(Exception e){
+    		ExceptionDialog.showException(null, "Titel", new Exception("Testtext", e), true, true);
+    	}
+    	try{
+    		throw new Exception("Testexception");
+    	} catch(Exception e){
+    		ExceptionDialog.showException(null, "Titel", new Exception("Testtext", e), true, true);
+    	}
     }
 
 }

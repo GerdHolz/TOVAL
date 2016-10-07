@@ -1,6 +1,5 @@
 package de.invation.code.toval.graphic.dialog;
 
-import de.invation.code.toval.validate.ExceptionDialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Window;
@@ -28,6 +27,8 @@ import de.invation.code.toval.validate.Validate;
 public abstract class AbstractDialog<O> extends JDialog {
 
     private static final long serialVersionUID = -5864654213215817665L;
+    
+    private static final Dimension DEFAULT_PREFERRED_SIZE = new Dimension(400,300);	
 
     private static final ButtonPanelLayout DEFAULT_BUTTON_LAYOUT = ButtonPanelLayout.LEFT_RIGHT;
     public static final Border DEFAULT_BORDER = BorderFactory.createEmptyBorder(5, 5, 5, 5);
@@ -43,11 +44,21 @@ public abstract class AbstractDialog<O> extends JDialog {
 
     protected String okButtonText = "OK";
     protected boolean includeCancelButton = true;
+    
+    protected AbstractDialog() {
+        super();
+    }
 
     protected AbstractDialog(Window owner) {
         super(owner);
         this.owner = owner;
         initialize();
+    }
+    
+    protected AbstractDialog(String title) {
+    	this();
+    	Validate.notNull(title);
+        setTitle(title);
     }
 
     protected AbstractDialog(Window owner, String title) {
@@ -55,9 +66,19 @@ public abstract class AbstractDialog<O> extends JDialog {
         Validate.notNull(title);
         setTitle(title);
     }
+    
+    protected AbstractDialog(ButtonPanelLayout buttonLayout) {
+        this();
+        setButtonPanelLayout(buttonLayout);
+    }
 
     protected AbstractDialog(Window owner, ButtonPanelLayout buttonLayout) {
         this(owner);
+        setButtonPanelLayout(buttonLayout);
+    }
+    
+    protected AbstractDialog(String title, ButtonPanelLayout buttonLayout) {
+        this(title);
         setButtonPanelLayout(buttonLayout);
     }
     
@@ -66,9 +87,11 @@ public abstract class AbstractDialog<O> extends JDialog {
         this.buttonLayout = buttonLayout;
     }
 
-    protected void initialize() {}
+    protected void initialize() {
+    	setPreferredSize(getDefaultPreferredSize());
+    }
 
-    protected void setUpGUI() throws Exception {
+    public void setUpGUI() throws Exception {
         this.setResizable(true);
         this.setModal(true);
         this.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -80,8 +103,8 @@ public abstract class AbstractDialog<O> extends JDialog {
 
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(mainPanel(), BorderLayout.CENTER);
-        getContentPane().add(getButtonPanel(), BorderLayout.SOUTH);
-        getRootPane().setDefaultButton(getDefaultButton());
+        getContentPane().add(getPanelButtons(), BorderLayout.SOUTH);
+        getRootPane().setDefaultButton(getButtonDefault());
 
         addComponents();
 
@@ -162,12 +185,16 @@ public abstract class AbstractDialog<O> extends JDialog {
         return getPreferredSize();
     }
 
-    protected O getDialogObject() {
+    public O getDialogObject() {
         return dialogObject;
     }
 
     protected void setDialogObject(O object) {
         this.dialogObject = object;
+    }
+    
+    protected Dimension getDefaultPreferredSize(){
+    	return DEFAULT_PREFERRED_SIZE;
     }
 
     protected abstract void addComponents() throws Exception;
@@ -178,60 +205,62 @@ public abstract class AbstractDialog<O> extends JDialog {
         return panelContent;
     }
 
-    protected JPanel getButtonPanel() {
-        if (panelButtons == null) {
-            panelButtons = new JPanel();
-            BoxLayout l = new BoxLayout(panelButtons, BoxLayout.PAGE_AXIS);
-            panelButtons.setLayout(l);
-            JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
-            panelButtons.add(separator);
-            panelButtons.add(Box.createHorizontalStrut(5));
-            JPanel buttons = new JPanel();
-            BoxLayout layout = new BoxLayout(buttons, BoxLayout.LINE_AXIS);
-            buttons.setLayout(layout);
-            switch (buttonLayout) {
-                case CENTERED:
-                    buttons.add(Box.createHorizontalGlue());
-                    for (JButton button : getButtons()) {
-                        buttons.add(button);
-                    }
-                    buttons.add(Box.createHorizontalGlue());
-                    break;
-                case LEFT_RIGHT:
-                    for (JButton lefthandButton : getLefthandButtons()) {
-                        buttons.add(lefthandButton);
-                    }
-                    buttons.add(Box.createHorizontalGlue());
-                    for (JButton righthandButton : getRighthandButtons()) {
-                        buttons.add(righthandButton);
-                    }
-                    break;
-            }
-            panelButtons.add(buttons);
-        }
-        return panelButtons;
-    }
+    protected JPanel getPanelButtons() {
+		if (panelButtons == null) {
+			panelButtons = new JPanel();
+			if (!getButtons().isEmpty()) {
+				BoxLayout l = new BoxLayout(panelButtons, BoxLayout.PAGE_AXIS);
+				panelButtons.setLayout(l);
+				JSeparator separator = new JSeparator(SwingConstants.HORIZONTAL);
+				panelButtons.add(separator);
+				panelButtons.add(Box.createHorizontalStrut(5));
+				JPanel buttons = new JPanel();
+				BoxLayout layout = new BoxLayout(buttons, BoxLayout.LINE_AXIS);
+				buttons.setLayout(layout);
+				switch (buttonLayout) {
+				case CENTERED:
+					buttons.add(Box.createHorizontalGlue());
+					for (JButton button : getButtons()) {
+						buttons.add(button);
+					}
+					buttons.add(Box.createHorizontalGlue());
+					break;
+				case LEFT_RIGHT:
+					for (JButton lefthandButton : getButtonsLefthand()) {
+						buttons.add(lefthandButton);
+					}
+					buttons.add(Box.createHorizontalGlue());
+					for (JButton righthandButton : getButtonsEditingValues()) {
+						buttons.add(righthandButton);
+					}
+					break;
+				}
+				panelButtons.add(buttons);
+			}
+		}
+		return panelButtons;
+	}
 
     protected List<JButton> getButtons() {
-        List<JButton> buttons = getLefthandButtons();
-        buttons.addAll(getRighthandButtons());
+        List<JButton> buttons = getButtonsLefthand();
+        buttons.addAll(getButtonsEditingValues());
         return buttons;
     }
 
-    protected List<JButton> getLefthandButtons() {
+    protected List<JButton> getButtonsLefthand() {
         return new ArrayList<JButton>();
     }
 
-    protected List<JButton> getRighthandButtons() {
+    protected List<JButton> getButtonsEditingValues() {
         ArrayList<JButton> result = new ArrayList<JButton>();
-        result.add(getOKButton());
+        result.add(getButtonOK());
         if (includeCancelButton) {
-            result.add(getCancelButton());
+            result.add(getButtonCancel());
         }
         return result;
     }
 
-    protected JButton getOKButton() {
+    protected JButton getButtonOK() {
         if (btnOK == null) {
             btnOK = new JButton(okButtonText);
             btnOK.addActionListener(new ActionListener() {
@@ -244,7 +273,7 @@ public abstract class AbstractDialog<O> extends JDialog {
         return btnOK;
     }
 
-    protected JButton getCancelButton() {
+    protected JButton getButtonCancel() {
         if (btnCancel == null) {
             btnCancel = new JButton("Cancel");
             btnCancel.addActionListener(new ActionListener() {
@@ -257,7 +286,7 @@ public abstract class AbstractDialog<O> extends JDialog {
         return btnCancel;
     }
 
-    protected JButton getDefaultButton() {
+    protected JButton getButtonDefault() {
         return btnOK;
     }
 

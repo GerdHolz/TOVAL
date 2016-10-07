@@ -1,8 +1,8 @@
 package de.invation.code.toval.misc.wd;
 
 import de.invation.code.toval.debug.SimpleDebugger;
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.types.HashList;
-import de.invation.code.toval.validate.ExceptionDialog;
 import de.invation.code.toval.validate.Validate;
 import java.util.List;
 

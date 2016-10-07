@@ -11,10 +11,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.icons.IconFactory;
 import de.invation.code.toval.thread.ExecutorListener;
 import de.invation.code.toval.thread.SingleThreadExecutorService;
-import de.invation.code.toval.validate.ExceptionDialog;
 import de.invation.code.toval.validate.Validate;
 
 public abstract class ExecutorLabel<Z> extends JLabel implements ExecutorListener<Z> {

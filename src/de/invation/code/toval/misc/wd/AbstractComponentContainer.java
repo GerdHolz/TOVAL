@@ -2,8 +2,8 @@ package de.invation.code.toval.misc.wd;
 
 import de.invation.code.toval.debug.SimpleDebugger;
 import de.invation.code.toval.file.FileUtils;
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.misc.NamedComponent;
-import de.invation.code.toval.validate.ExceptionDialog;
 import de.invation.code.toval.validate.ParameterException;
 import de.invation.code.toval.validate.ParameterException.ErrorCode;
 import de.invation.code.toval.validate.Validate;

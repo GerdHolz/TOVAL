@@ -17,8 +17,10 @@ import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -30,13 +32,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 
 import de.invation.code.toval.graphic.dialog.AbstractEditCreateDialog;
-import de.invation.code.toval.graphic.dialog.DefineGenerateDialog;
 import de.invation.code.toval.graphic.dialog.StringDialog;
+import de.invation.code.toval.graphic.dialog.ValueEditingDialog;
 import de.invation.code.toval.graphic.renderer.AlternatingRowColorListCellRenderer;
 import de.invation.code.toval.misc.ArrayUtils;
 import de.invation.code.toval.validate.ParameterException;
-import javax.swing.Box;
-import javax.swing.JComponent;
 
 public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
 
@@ -193,7 +193,7 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
     }
 
     @Override
-    protected SOABase getDialogObject() {
+    public SOABase getDialogObject() {
         return (SOABase) super.getDialogObject();
     }
 
@@ -248,8 +248,8 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
 //		return btnImportActivities;
 //	}
     @Override
-    protected List<JButton> getLefthandButtons() {
-        List<JButton> lhb = super.getLefthandButtons();
+    protected List<JButton> getButtonsLefthand() {
+        List<JButton> lhb = super.getButtonsLefthand();
         lhb.add(getButtonShowContext());
         return lhb;
     }
@@ -477,7 +477,7 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
         public void actionPerformed(ActionEvent e) {
             List<String> objects = null;
             try {
-                objects = DefineGenerateDialog.showDialog(SOABaseDialog.this, getDialogObject().getObjectDescriptorPlural());
+                objects = ValueEditingDialog.showDialog(SOABaseDialog.this, getDialogObject().getObjectDescriptorPlural(), String.class);
             } catch (Exception e2) {
                 internalException("Cannot launch value chooser dialog dialog.", e2);
             }
@@ -507,7 +507,7 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
         public void actionPerformed(ActionEvent e) {
             List<String> subjects = null;
             try {
-                subjects = DefineGenerateDialog.showDialog(SOABaseDialog.this, getDialogObject().getSubjectDescriptorPlural());
+                subjects = ValueEditingDialog.showDialog(SOABaseDialog.this, getDialogObject().getSubjectDescriptorPlural(), String.class);
             } catch (Exception e2) {
                 internalException("Cannot launch value chooser dialog dialog.", e2);
             }
@@ -537,9 +537,10 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
         public void actionPerformed(ActionEvent e) {
             List<String> activities = null;
             try {
-                activities = DefineGenerateDialog.showDialog(SOABaseDialog.this, getDialogObject().getActivityDescriptorPlural());
+                activities = ValueEditingDialog.showDialog(SOABaseDialog.this, getDialogObject().getActivityDescriptorPlural(), String.class);
             } catch (Exception e2) {
                 internalException("Cannot launch value chooser dialog dialog.", e2);
+                return;
             }
             if (activities != null) {
                 try {

@@ -1,6 +1,7 @@
 package de.invation.code.toval.validate;
 
 import java.io.File;
+import java.util.Collection;
 
 import de.invation.code.toval.validate.ParameterException.ErrorCode;
 
@@ -387,6 +388,17 @@ public class Validate {
 		if(!type.isAssignableFrom(value.getClass())){
 			throw new TypeException(type.getCanonicalName());
 		}
+	}
+	
+	/**
+	 * Checks if the elements of a given collection have a specific type.
+	 * @param valueColl The collection of elements to validate.
+	 * @param type The target type.
+	 * @throws ParameterException if the type of at least one element is not a valid subclass of the target type.
+	 */
+	public static <T,V extends Object> void type(Collection<V> valueColl, Class<T> type) {
+		for(V value: valueColl)
+			type(value, type);
 	}
 	
 	//------- Numerical checks ----------------------------------------------------------------------------

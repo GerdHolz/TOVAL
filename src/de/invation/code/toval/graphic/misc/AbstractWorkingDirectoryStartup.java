@@ -1,9 +1,9 @@
 package de.invation.code.toval.graphic.misc;
 
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.graphic.dialog.MessageDialog;
 import de.invation.code.toval.misc.wd.AbstractWorkingDirectoryProperties;
 import de.invation.code.toval.properties.PropertyException;
-import de.invation.code.toval.validate.ExceptionDialog;
 import de.invation.code.toval.validate.ParameterException;
 import java.lang.reflect.InvocationTargetException;
 import javax.swing.SwingUtilities;

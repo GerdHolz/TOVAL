@@ -20,7 +20,7 @@ import javax.swing.border.Border;
  * 
  * @author Thomas Stocker
  */
-public class AlternatingRowColorListCellRenderer extends JLabel implements ListCellRenderer {
+public class AlternatingRowColorListCellRenderer<O> extends JLabel implements ListCellRenderer<O> {
 
 	private static final long serialVersionUID = 3860155129823751738L;
 	
@@ -58,7 +58,7 @@ public class AlternatingRowColorListCellRenderer extends JLabel implements ListC
 	}
 
 	@Override
-	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
+	public Component getListCellRendererComponent(JList<? extends O> list, O value, int index, boolean isSelected, boolean cellHasFocus) {
 
 		if(value != null){
 			setText(getText(value));
@@ -83,11 +83,12 @@ public class AlternatingRowColorListCellRenderer extends JLabel implements ListC
 		return this;
 	}
 	
-	protected String getText(Object value){
+	protected String getText(O value){
 		return value.toString();
 	}
 
-	protected String getTooltip(Object value){
+	protected String getTooltip(O value){
 		return value.toString();
 	}
+
 }

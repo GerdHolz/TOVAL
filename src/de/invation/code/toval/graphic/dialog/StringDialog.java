@@ -5,34 +5,35 @@ import java.awt.Dimension;
 import java.awt.Window;
 
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+
+import de.invation.code.toval.graphic.component.ContentSensitiveTextPane;
 
 public class StringDialog extends AbstractDialog<String> {
 
 	private static final long serialVersionUID = 4501959307493776929L;
 	
-	private static final Dimension PREFERRED_SIZE = new Dimension(400,300);
+	private static final Dimension PREFERRED_SIZE = new Dimension(400,300);	
 	
-	private JTextArea textArea;
+	private ContentSensitiveTextPane textPane;
 	private boolean isEditable = false;
 
-	protected StringDialog(Window parent, String text) {
+	public StringDialog(Window parent, String text) {
 		super(parent);
 		setDialogObject(text);
 	}
 	
-	protected StringDialog(Window parent, String text, boolean isEditable) {
+	public StringDialog(Window parent, String text, boolean isEditable) {
 		super(parent);
 		setDialogObject(text);
 		this.isEditable = isEditable;
 	}
 	
-	protected StringDialog(Window parent, String title, String text) {
+	public StringDialog(Window parent, String title, String text) {
 		super(parent, title);
 		setDialogObject(text);
 	}
 	
-	protected StringDialog(Window parent, String title, String text, boolean isEditable) {
+	public StringDialog(Window parent, String title, String text, boolean isEditable) {
 		super(parent, title);
 		setDialogObject(text);
 		this.isEditable = isEditable;
@@ -53,10 +54,10 @@ public class StringDialog extends AbstractDialog<String> {
 		mainPanel().setLayout(new BorderLayout());
 		JScrollPane scrollPane = new JScrollPane();
 		mainPanel().add(scrollPane, BorderLayout.CENTER);
-		textArea = new JTextArea();
-		textArea.setEditable(isEditable);
-		textArea.setText(getDialogObject());
-		scrollPane.setViewportView(textArea);
+		textPane = new ContentSensitiveTextPane();
+		textPane.setEditable(isEditable);
+		textPane.setText(getDialogObject());
+		scrollPane.setViewportView(textPane);
 	}
 
 	@Override
@@ -64,17 +65,12 @@ public class StringDialog extends AbstractDialog<String> {
 
 	@Override
 	protected void okProcedure() {
-		setDialogObject(textArea.getText());
+		setDialogObject(textPane.getText());
 		super.okProcedure();
 	}
 
 	@Override
-	public Dimension getMinimumSize() {
-		return PREFERRED_SIZE;
-	}
-
-	@Override
-	public Dimension getPreferredSize() {
+	protected Dimension getDefaultPreferredSize() {
 		return PREFERRED_SIZE;
 	}
 
@@ -102,9 +98,9 @@ public class StringDialog extends AbstractDialog<String> {
 		return dialog.getDialogObject();
 	}
 	
-	public static void main(String[] args) throws Exception {
-		String result = StringDialog.showDialog(null, "Testtile", "DFas ist ein Textm, den es anzuschauen und zu verbesern gilt.");
-		System.out.println(result);
-	}
+//	public static void main(String[] args) throws Exception {
+////		String result = StringDialog.showDialog(null, "Testtile", "DFas ist ein <br>Textm, den es anzuschauen und zu verbesern gilt.", true);
+//		String result2 = StringDialog.showDialog(null, "Testtitel", "DFas ist ein \nTextm, den es anzuschauen und zu verbesern gilt.", true);
+//	}
 
 }

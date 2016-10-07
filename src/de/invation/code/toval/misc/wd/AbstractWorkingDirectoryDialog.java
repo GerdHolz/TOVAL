@@ -3,8 +3,8 @@ package de.invation.code.toval.misc.wd;
 import de.invation.code.toval.debug.SimpleDebugger;
 import de.invation.code.toval.file.FileUtils;
 import de.invation.code.toval.graphic.dialog.AbstractDialog;
+import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.graphic.renderer.AlternatingRowColorListCellRenderer;
-import de.invation.code.toval.validate.ExceptionDialog;
 import de.invation.code.toval.validate.ExceptionListener;
 import de.invation.code.toval.validate.ParameterException;
 import de.invation.code.toval.validate.Validate;
@@ -82,14 +82,14 @@ public abstract class AbstractWorkingDirectoryDialog<E> extends AbstractDialog<S
     }
 
     @Override
-    protected List<JButton> getLefthandButtons() {
+    protected List<JButton> getButtonsLefthand() {
         newDirectoryAction = new NewWorkingDirectoryAction(AbstractWorkingDirectoryDialog.this, properties, debugger);
         newDirectoryAction.addPropertyChangeListener(AbstractWorkingDirectoryDialog.this);
         newDirectoryAction.addExceptionListener(AbstractWorkingDirectoryDialog.this);
         openDirectoryAction = new OpenWorkingDirectoryAction(AbstractWorkingDirectoryDialog.this, properties, debugger);
         openDirectoryAction.addPropertyChangeListener(AbstractWorkingDirectoryDialog.this);
         openDirectoryAction.addExceptionListener(AbstractWorkingDirectoryDialog.this);
-        List<JButton> buttons = super.getLefthandButtons();
+        List<JButton> buttons = super.getButtonsLefthand();
         JButton newDirectoryButton = new JButton(newDirectoryAction);
         buttons.add(newDirectoryButton);
         JButton openDirectoryButton = new JButton(openDirectoryAction);
