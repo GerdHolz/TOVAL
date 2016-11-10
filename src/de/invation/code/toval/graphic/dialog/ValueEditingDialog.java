@@ -130,7 +130,7 @@ public class ValueEditingDialog<O> extends AbstractDialog<List<O>> {
 	}
 	
 	@Override
-	protected List<JButton> getButtonsLefthand() {
+	protected List<JButton> getButtonsLefthand() throws Exception {
 		List<JButton> buttons = super.getButtonsLefthand();
         if(visibilityButtonAdd)
 			buttons.add(getButtonAdd());

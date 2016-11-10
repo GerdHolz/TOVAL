@@ -1,29 +1,86 @@
 package de.invation.code.toval.file;
 
+import java.awt.Desktop;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import de.invation.code.toval.os.OSType;
 import de.invation.code.toval.os.OSUtils;
 import de.invation.code.toval.validate.ParameterException;
 import de.invation.code.toval.validate.ParameterException.ErrorCode;
 import de.invation.code.toval.validate.Validate;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 public class FileUtils {
+	
+	public static final boolean DEFAULT_OPEN_STORED_STREAM_FILES = false;
+	
+	public static File writeStream(InputStream stream, String outputDirectory, String fileName) throws Exception{
+		return writeStream(stream, new File(outputDirectory), fileName);
+	}
+	
+	public static File writeStream(InputStream stream, File outputDirectory, String fileName) throws Exception{
+		return writeStream(stream, outputDirectory, fileName, DEFAULT_OPEN_STORED_STREAM_FILES);
+	}
+	
+	public static File writeStream(InputStream stream, String outputDirectory, String fileName, boolean open) throws Exception{
+		return writeStream(stream, new File(outputDirectory), fileName, open);
+	}
+	
+	public static File writeStream(InputStream stream, File outputDirectory, String fileName, boolean open) throws Exception{
+		Validate.directory(outputDirectory);
+		Validate.fileName(fileName);
+		File documentFile = new File(outputDirectory, fileName);
+		try {
+			OutputStream outStream = new FileOutputStream(documentFile);
+			byte[] buffer = new byte[1];
+			while (stream.read(buffer) > 0) {
+				outStream.write(buffer);
+			}
+			outStream.close();
+		} catch(Exception e1){
+			throw new Exception("Cannot store stream content in output directory '" + outputDirectory.getAbsolutePath() + "'", e1);
+		}
+		if(open){
+			openFile(documentFile);
+		}
+		return documentFile;
+	}
+	
+	public static void openFile(String file) throws Exception{
+		openFile(new File(file));
+	}
+	
+	public static void openFile(File file) throws Exception{
+		Validate.exists(file);
+		if(Desktop.isDesktopSupported()){
+			Desktop dt = Desktop.getDesktop();
+			try {
+				dt.open(file);
+			} catch (IOException e1) {
+				throw new Exception("File cannot be opened", e1);
+			}
+		}
+	}
+	
+	public static void openFiles(Collection<File> files) throws Exception{
+		for(File file: files)
+			openFile(file);
+	}
 
     public static List<File> getFilesInDirectory(String directory) throws IOException {
         return getFilesInDirectory(directory, null);

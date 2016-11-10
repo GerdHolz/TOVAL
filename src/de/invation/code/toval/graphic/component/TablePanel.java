@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 public abstract class TablePanel<T extends JTable> extends JPanel {
 	
@@ -43,11 +45,28 @@ public abstract class TablePanel<T extends JTable> extends JPanel {
 	}
 	
 	public T getTable(){
-		if(tableReview == null){
+		if (tableReview == null) {
 			tableReview = createTable();
+			tableReview.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+				public void valueChanged(ListSelectionEvent e) {
+					processSelectionChange();
+				}
+			});
 		}
 		return tableReview;
 	}
+	
+	protected void enableButtons(){
+		for(JButton button: getButtons())
+			button.setEnabled(true);
+	}
+	
+	protected void disableButtons(){
+		for(JButton button: getButtons())
+			button.setEnabled(false);
+	}
+	
+	protected void processSelectionChange(){};
 	
 	protected abstract T createTable();
 	

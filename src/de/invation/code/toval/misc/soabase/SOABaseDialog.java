@@ -248,7 +248,7 @@ public class SOABaseDialog extends AbstractEditCreateDialog<SOABase> {
 //		return btnImportActivities;
 //	}
     @Override
-    protected List<JButton> getButtonsLefthand() {
+    protected List<JButton> getButtonsLefthand() throws Exception {
         List<JButton> lhb = super.getButtonsLefthand();
         lhb.add(getButtonShowContext());
         return lhb;

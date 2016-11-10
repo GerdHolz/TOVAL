@@ -82,7 +82,7 @@ public abstract class AbstractWorkingDirectoryDialog<E> extends AbstractDialog<S
     }
 
     @Override
-    protected List<JButton> getButtonsLefthand() {
+    protected List<JButton> getButtonsLefthand() throws Exception {
         newDirectoryAction = new NewWorkingDirectoryAction(AbstractWorkingDirectoryDialog.this, properties, debugger);
         newDirectoryAction.addPropertyChangeListener(AbstractWorkingDirectoryDialog.this);
         newDirectoryAction.addExceptionListener(AbstractWorkingDirectoryDialog.this);

@@ -28,6 +28,10 @@ public class TimeValue implements Comparable<TimeValue>, Serializable{
 	
 	public TimeValue(){}
 	
+	public TimeValue(TimeValue timeValue) throws ParameterException{
+		this(timeValue.getValue(), timeValue.getScale());
+	}
+	
 	public TimeValue(Double value, TimeScale scale) throws ParameterException{
 		Validate.notNull(value);
 		Validate.notNull(scale);

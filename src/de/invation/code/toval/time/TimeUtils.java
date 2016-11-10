@@ -7,6 +7,10 @@ public class TimeUtils {
 	
 	public static final boolean DEFAULT_CLEAR_TIME_OF_DAY = false;
 	
+	public static int actualYear(){
+		return Calendar.getInstance().get(Calendar.YEAR);
+	}
+	
 	public static Date today(){
 		return new Date();
 	}
@@ -79,19 +83,38 @@ public class TimeUtils {
 		return cal.getTime();
 	}
 	
+	private static final void setTime(Date date, int field, int value){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		cal.set(field, value);
+		date.setTime(cal.getTimeInMillis());
+	}
+	
+	public static final void setYear(Date date, int year){
+		setTime(date, Calendar.YEAR, year);
+	}
+	
+	public static final void seMonth(Date date, int month){
+		setTime(date, Calendar.MONTH, month);
+	}
+	
 	public static final boolean inActualYear(Date date){
 		return actualYearStart().getTime() <= date.getTime() && actualYearEnd().getTime() >= date.getTime();
 	}
 	
-	public static void main(String[] args) {
-		System.out.println(tomorrow());
-		System.out.println(yesterday());
-		System.out.println(tomorrow(true));
-		System.out.println(yesterday(true));
-		System.out.println(today());
-		System.out.println(today(true));
-		System.out.println(actualYearStart());
-		System.out.println(actualYearEnd());
+	public static TimeValue difference(Date date1, Date date2){
+		return new TimeValue(Math.abs(date1.getTime() - date2.getTime()), TimeScale.MILLISECONDS);
 	}
+	
+//	public static void main(String[] args) {
+//		System.out.println(tomorrow());
+//		System.out.println(yesterday());
+//		System.out.println(tomorrow(true));
+//		System.out.println(yesterday(true));
+//		System.out.println(today());
+//		System.out.println(today(true));
+//		System.out.println(actualYearStart());
+//		System.out.println(actualYearEnd());
+//	}
 
 }

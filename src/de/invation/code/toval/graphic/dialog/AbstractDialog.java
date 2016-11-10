@@ -205,7 +205,7 @@ public abstract class AbstractDialog<O> extends JDialog {
         return panelContent;
     }
 
-    protected JPanel getPanelButtons() {
+    protected JPanel getPanelButtons() throws Exception {
 		if (panelButtons == null) {
 			panelButtons = new JPanel();
 			if (!getButtons().isEmpty()) {
@@ -241,13 +241,13 @@ public abstract class AbstractDialog<O> extends JDialog {
 		return panelButtons;
 	}
 
-    protected List<JButton> getButtons() {
+    protected List<JButton> getButtons() throws Exception {
         List<JButton> buttons = getButtonsLefthand();
         buttons.addAll(getButtonsEditingValues());
         return buttons;
     }
 
-    protected List<JButton> getButtonsLefthand() {
+    protected List<JButton> getButtonsLefthand() throws Exception {
         return new ArrayList<JButton>();
     }
 

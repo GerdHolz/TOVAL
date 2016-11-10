@@ -210,29 +210,75 @@ public class ListUtils {
 	 *            Type of list elements
 	 * @param list
 	 *            The list to divide
-	 * @param cuts
+	 * @param positions
 	 *            Cut positions for divide operations
 	 * @return A list of sublists of <code>list</code> according to the given
 	 *         cut positions
 	 */
-	public static <T> List<List<T>> divideList(List<T> list, Integer... cuts) {
-		Arrays.sort(cuts);
-		int c = cuts.length;
-		if (cuts[0] < 0 || cuts[c - 1] > list.size() - 1)
-			throw new IllegalArgumentException();
-		int startIndex = cuts[0] == 0 ? 1 : 0;
-		if (cuts[c - 1] != list.size() - 1) {
-			cuts = Arrays.copyOf(cuts, cuts.length + 1);
-			cuts[cuts.length - 1] = list.size() - 1;
-			c++;
+	public static <T> List<List<T>> divideListSize(List<T> list, int listSize) {
+		if(list.size() <= listSize)
+			return new ArrayList<>(Arrays.asList(list));
+		int numLists = (int) Math.ceil(list.size() / (listSize + 0.0));
+//		System.out.println("num lists: " + numLists);
+		Integer[] positions = new Integer[numLists-1];
+		for(int i=0; i<numLists; i++){
+			int position = ((i+1)*listSize);
+//			System.out.println("position: " + position);
+			if(position < list.size()){
+				positions[i] = position;
+//				System.out.println("add position");
+			}
 		}
-		List<List<T>> result = new ArrayList<>(c - startIndex);
-		int lastEnd = 0;
-		for (int i = startIndex; i <= c - 1; i++) {
-			int c2 = i < c - 1 ? 0 : 1;
-			result.add(copyOfRange(list, lastEnd, cuts[i] + c2 - 1));
-
-			lastEnd = cuts[i];
+//		System.out.println(Arrays.toString(positions));
+		return divideListPos(list, positions);
+	}
+	
+	/**
+	 * Divides the given list using the boundaries in <code>cuts</code>.<br>
+	 * Cuts are interpreted in an inclusive way, which means that a single cut
+	 * at position i divides the given list in 0...i-1 + i...n<br>
+	 * This method deals with both cut positions including and excluding start index 0.<br>
+	 * 
+	 * @param <T>
+	 *            Type of list elements
+	 * @param list
+	 *            The list to divide
+	 * @param positions
+	 *            Cut positions for divide operations
+	 * @return A list of sublists of <code>list</code> according to the given
+	 *         cut positions
+	 */
+	public static <T> List<List<T>> divideListPos(List<T> list, Integer... positions) {
+		Arrays.sort(positions);
+		if (positions[0] < 0 || positions[positions.length - 1] > list.size() -1)
+			throw new IllegalArgumentException();
+		
+		Integer[] positionsInternal = null;
+		boolean containsZeroIndex = positions[0] == 0;
+		if(containsZeroIndex){
+			if(positions.length == 1)
+				return new ArrayList<>(Arrays.asList(list));
+			positionsInternal = Arrays.copyOfRange(positions, 1, positions.length);
+		} else {
+			positionsInternal = positions;
+		}
+		int numPositions = positionsInternal.length;
+		
+//		System.out.println("Positions: " + Arrays.toString(positionsInternal));
+		
+		List<List<T>> result = new ArrayList<>(numPositions + 1);
+		int lastEndIndex = 0;
+		for (int i = 0; i < numPositions; i++) {
+//			System.out.println("consider cut position " + positionsInternal[i]);
+			int startIndex = lastEndIndex + (result.isEmpty() ? 0 : 1);
+			int endIndex = positionsInternal[i] - 1;
+//			System.out.println("start index: " + startIndex);
+//			System.out.println("  end index: " + endIndex);
+			result.add(copyOfRange(list, startIndex, endIndex));
+			lastEndIndex = endIndex;
+		}
+		if(lastEndIndex < list.size() - 1){
+			result.add(copyOfRange(list, lastEndIndex+1, list.size()-1));
 		}
 		return result;
 	}
@@ -247,14 +293,14 @@ public class ListUtils {
 	 * 
 	 * @param list
 	 *            List to divide
-	 * @param cuts
+	 * @param positions
 	 *            Cut positions for divide operations
 	 * @return A list of sublists of <code>list</code> according to the given
 	 *         cut positions
-	 * @see #divideList(List, Integer...)
+	 * @see #divideListPos(List, Integer...)
 	 */
-	public static List<List<Object>> divideObjectList(List<Object> list, Integer... cuts) {
-		return divideList(list, cuts);
+	public static List<List<Object>> divideObjectListPos(List<Object> list, Integer... positions) {
+		return divideListPos(list, positions);
 	}
 
 	public static <T> List<List<T>> randomPartition(List<T> coll, int number) {
@@ -267,7 +313,7 @@ public class ListUtils {
 			if (nextInt > 0 && nextInt < coll.size() - 1)
 				cuts.add(nextInt);
 		}
-		return divideList(coll, cuts.toArray(new Integer[1]));
+		return divideListPos(coll, cuts.toArray(new Integer[1]));
 	}
 
 	public static <T> List<List<T>> exponentialPartition(List<T> coll, int number) {
@@ -278,11 +324,12 @@ public class ListUtils {
 		Double factor = Math.max(3.0, 3.0 + (3.0 - number)) / Math.max(3, 3.0 + (number - 3.0));
 		for (int i = -1; i > (-1) * number; i--) {
 			int cut = (int) Math.ceil(Math.exp(factor * i) * coll.size());
-			if (cut == coll.size() || (!cuts.isEmpty() && cut == cuts.get(cuts.size() - 1)))
+			if (cut == coll.size() || (!cuts.isEmpty() && cut == cuts.get(cuts.size() - 1))){
 				cut -= 1;
+			}
 			cuts.add(cut);
 		}
-		return divideList(coll, cuts.toArray(new Integer[1]));
+		return divideListPos(coll, cuts.toArray(new Integer[1]));
 	}
 
 	private static <T> List<List<T>> checkPartitionConditions(List<T> coll, int number) {
@@ -395,6 +442,12 @@ public class ListUtils {
 		return new ListPermutations<>(list);
 	}
 
+	/**
+	 * Generates all partitions with the given number of elements per partition.<br>
+	 * @param list The basic list for partition generation
+	 * @param elementCounts element counts per partition
+	 * @return
+	 */
 	public static <T> List<Partition<T>> getPartitions(List<T> list, Integer... elementCounts) {
 		int totalCount = 0;
 		for (Integer elements : elementCounts)
@@ -408,7 +461,7 @@ public class ListUtils {
 		Iterator<List<T>> permutations = getPermutations(list);
 		while (permutations.hasNext()) {
 			Partition<T> part = new Partition<>(list);
-			List<List<T>> dividedList = divideList(permutations.next(), cuts);
+			List<List<T>> dividedList = divideListPos(permutations.next(), cuts);
 			for (List<T> l : dividedList)
 				part.addSubset(l);
 			result.add(part);
@@ -652,6 +705,12 @@ public class ListUtils {
 			// writer.writeLine("};");
 			writer.closeFile();
 		}
+	}
+	
+	public static void main(String[] args) {
+		List<Integer> list = createAndInitializeList(10, 1);
+		CollectionUtils.print(exponentialPartition(list, 5));
+//		CollectionUtils.print(divideListPos(list, 1,2));
 	}
 
 }

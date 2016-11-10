@@ -2,7 +2,10 @@ package de.invation.code.toval.validate;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Date;
 
+import de.invation.code.toval.time.TimeUtils;
+import de.invation.code.toval.time.TimeValue;
 import de.invation.code.toval.validate.ParameterException.ErrorCode;
 
 public class Validate {
@@ -1043,6 +1046,61 @@ public class Validate {
 		if(file.exists())
 			throw new ParameterException("\""+file+"\" exists!");
 		return file;
+	}
+	
+	public static final void dateInActualYear(Date date){
+		if(!TimeUtils.inActualYear(date))
+			throw new ParameterException("Date not in actual year");
+	}
+	
+	public static final void dateInFuture(Date date){
+		if(!date.after(TimeUtils.today()))
+			throw new ParameterException("Date not in future");
+	}
+	
+	public static final void dateInFuture(Date date, TimeValue maxDiffFromNow){
+		Date maxDate = new Date();
+		maxDate.setTime(TimeUtils.today().getTime() + maxDiffFromNow.getValueInMilliseconds());
+		dateInFuture(date, maxDate);
+	}
+	
+	public static final void dateInFuture(Date date, Date maxDate){
+		dateInFuture(date);
+		if(date.after(maxDate))
+			throw new ParameterException("Date too far in future");
+	}
+	
+	public static final void dateNotInFuture(Date date){
+		Date today = TimeUtils.today();
+		if(today.equals(date))
+			return;
+		if(date.after(today))
+			throw new ParameterException("Date in future");
+	}
+	
+	public static final void dateInPast(Date date, TimeValue maxDiffFromNow){
+		Date minDate = new Date();
+		minDate.setTime(TimeUtils.today().getTime() - maxDiffFromNow.getValueInMilliseconds());
+		dateInFuture(date, minDate);
+	}
+	
+	public static final void dateInPast(Date date, Date minDate){
+		dateInFuture(date);
+		if(date.before(minDate))
+			throw new ParameterException("Date too far in past");
+	}
+	
+	public static final void dateInPast(Date date){
+		if(!date.before(TimeUtils.today()))
+			throw new ParameterException("Date not in past");
+	}
+	
+	public static final void dateNotInPast(Date date){
+		Date today = TimeUtils.today();
+		if(today.equals(date))
+			return;
+		if(date.before(today))
+			throw new ParameterException("Date in past");
 	}
 	
 	public static void main(String[] args)  {
