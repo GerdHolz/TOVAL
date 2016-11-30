@@ -64,6 +64,18 @@ public class StringUtils {
 		return count;
 	}
 	
+	public static int countLines(String string) {
+	    if(string == null || string.isEmpty())
+	    	return 0;
+	    
+	    int lines = 1;
+	    int pos = 0;
+	    while ((pos = string.indexOf("\n", pos) + 1) != 0) {
+	        lines++;
+	    }
+	    return lines;
+	}
+	
 	public static String removeLeading(String string, char character){
 		int index = 0;
 		for(int i=0; i<string.length(); i++){
@@ -100,6 +112,13 @@ public class StringUtils {
 		for(int i=0; i<occurrences; i++)
 			arr[i] = character;
 		return new String(arr);
+	}
+	
+	public static String createString(String baseString, int occurrences){
+		StringBuilder builder = new StringBuilder();
+		for(int i=0; i<occurrences; i++)
+			builder.append(baseString);
+		return builder.toString();
 	}
 	
 	public static String convertToHTML(String string) throws ParameterException{
