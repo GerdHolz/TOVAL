@@ -97,6 +97,7 @@ public class ListPropertyEditingPanel<E extends AbstractTypedProperties<P>, P ex
 	}
 
 	private void updateValueList(){
+		listModel.clear();
 		CollectionUtils.print(getChosenValues());
 		for(Object o: getChosenValues()){
 			listModel.addElement(o);

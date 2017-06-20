@@ -195,7 +195,7 @@ public class ExceptionDialog extends JDialog {
             builder.append("<br>");
         }
         textPane.setEditable(false);
-        textPane.setContent(builder.toString());
+        textPane.setText(builder.toString());
         JScrollPane scrollPane = new JScrollPane(textPane);
         scrollPane.setBorder(null);
         return scrollPane;

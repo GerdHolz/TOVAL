@@ -31,6 +31,27 @@ public class ArrayUtils {
 	 * having type <code>Float</code> or <code>Double</code>.
 	 */
 	public static final int DEFAULT_PRECISION = 2;
+	
+	/**
+	 * Combines the given arrays into one array.
+	 * 
+	 * @param first
+	 * @param rest
+	 * @return
+	 */
+	public static <T> T[] concatAll(T[] first, T[]... rest) {
+		  int totalLength = first.length;
+		  for (T[] array : rest) {
+		    totalLength += array.length;
+		  }
+		  T[] result = Arrays.copyOf(first, totalLength);
+		  int offset = first.length;
+		  for (T[] array : rest) {
+		    System.arraycopy(array, 0, result, offset, array.length);
+		    offset += array.length;
+		  }
+		  return result;
+		}
 
 	/**
 	 * Returns a new array with the given size containing the default value at

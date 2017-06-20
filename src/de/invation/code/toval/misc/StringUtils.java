@@ -123,9 +123,37 @@ public class StringUtils {
 	
 	public static String convertToHTML(String string) throws ParameterException{
 		Validate.notNull(string);
-		String htmlString = "<html>"+string.replace("\n", "<br>")+"</html>";
+		String htmlString = "<html>"+string.replace(System.getProperty("line.separator"), "<br>")+"</html>";
 		htmlString = htmlString.replace(" ", "&nbsp;");
 		return htmlString;
+	}
+	
+	public static String padAfterNewLine(String multipleLineString, String paddingString) throws Exception{
+		return padAfterNewLine(multipleLineString, paddingString, System.getProperty("line.separator"));
+	}
+	
+	public static String padAfterNewLine(String multipleLineString, String paddingString, String newLineString) throws Exception{
+		Validate.notNull(multipleLineString);
+		Validate.notEmpty(multipleLineString);
+		Validate.notNull(paddingString);
+		Validate.notEmpty(paddingString);
+		Validate.notNull(newLineString);
+		Validate.notEmpty(newLineString);
+		String[] lineStrings = multipleLineString.split(newLineString);
+		if(lineStrings.length == 0)
+			throw new Exception("Empty split result");
+		StringBuilder builder = new StringBuilder();
+		for(int i=0; i < lineStrings.length; i++){
+			builder.append(lineStrings[i]);
+			builder.append(newLineString);
+			if(i<lineStrings.length-1)
+				builder.append(paddingString);
+		}
+		return builder.toString();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		System.out.println(padAfterNewLine("erste\nzweite", "     ->", "\n"));
 	}
 
 }

@@ -116,6 +116,20 @@ public class Validate {
 			throw new ParameterException(ErrorCode.EMPTY);
 	}
 	
+	/**
+	 * Checks if the given String is empty.
+	 * @param string The String to validate.
+	 * @param message The error message to include in the Exception in case the validation fails.
+	 * @throws ParameterException if the given String is empty.
+	 */
+	public static void notEmpty(String string, String message)  {
+		if(!validation) return;
+		notNull(message);
+		notNull(string, message);
+		if(string.length() == 0)
+			throw new ParameterException(ErrorCode.EMPTY, message);
+	}
+	
 	//------- Boolean checks ----------------------------------------------------------------------
 	
 	/**

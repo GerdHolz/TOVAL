@@ -17,7 +17,7 @@ import de.invation.code.toval.validate.ParameterException;
  * This allows applications to handle properties in a straightforward way by just defining an adequate subclass of {@link AbstractTypedProperties}
  * with the opportunity of an easy integration of graphical dialogs (see {@link PropertySettingDialog}). 
  * 
- * @author StockerT
+ * @author Thomas Stocker
  *
  * @param <P> Property type
  */
@@ -210,7 +210,7 @@ public abstract class AbstractTypedProperties<P extends Enum<P> & Property> exte
 				break;
 			}
 		} catch (Exception e) {
-			throw new PropertyException(property, propertyValueAsString, "Cannot extract propeerty value from string", e);
+			throw new PropertyException(property, propertyValueAsString, "Cannot extract property value from string", e);
 		}
 
 		if (result != null) {

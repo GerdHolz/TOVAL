@@ -15,6 +15,14 @@ public class TimeValue implements Comparable<TimeValue>, Serializable{
 	private final String toStringFormat = "%s %s";
 	private final String toStringFormatShort = "%s%s";
 	
+	public static final TimeValue ONE_YEAR = new TimeValue(1, TimeScale.YEARS);
+	public static final TimeValue ONE_MONTH = new TimeValue(1, TimeScale.MONTHS);
+	public static final TimeValue ONE_WEEK = new TimeValue(1, TimeScale.WEEKS);
+	public static final TimeValue ONE_DAY = new TimeValue(1, TimeScale.DAYS);
+	public static final TimeValue ONE_HOUR = new TimeValue(1, TimeScale.HOURS);
+	public static final TimeValue ONE_MINUTE = new TimeValue(1, TimeScale.MINUTES);
+	public static final TimeValue ONE_SECOND = new TimeValue(1, TimeScale.SECONDS);
+	
 	protected static final long FACTOR_SECONDS = 1000;
 	protected static final long FACTOR_MINUTES = FACTOR_SECONDS*60;
 	protected static final long FACTOR_HOURS = FACTOR_MINUTES*60;
@@ -30,6 +38,11 @@ public class TimeValue implements Comparable<TimeValue>, Serializable{
 	
 	public TimeValue(TimeValue timeValue) throws ParameterException{
 		this(timeValue.getValue(), timeValue.getScale());
+	}
+	
+	public TimeValue(TimeValue timeValue, TimeScale scale) throws ParameterException{
+		this(timeValue.getValue(), timeValue.getScale());
+		setScale(scale, true);
 	}
 	
 	public TimeValue(Double value, TimeScale scale) throws ParameterException{

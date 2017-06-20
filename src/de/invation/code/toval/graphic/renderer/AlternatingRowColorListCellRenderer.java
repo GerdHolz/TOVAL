@@ -2,12 +2,15 @@ package de.invation.code.toval.graphic.renderer;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.Border;
+
+import de.invation.code.toval.misc.StringUtils;
 
 /**
  * This customized ListCellRenderer color the rows of a JList with two colors in an alternating way.<br>
@@ -27,6 +30,7 @@ public class AlternatingRowColorListCellRenderer<O> extends JLabel implements Li
 	public static final Color DEFAULT_SELECTED_COLOR = new Color(10, 100, 200);
 	public static final Color DEFAULT_ALTERNATING_COLOR = new Color(230, 230, 230);
 	public static final Border DEFAULT_BORDER = BorderFactory.createEmptyBorder(0, 10, 0, 0);
+	public static final boolean DEFAULT_MONOSPACED = false;
 	
 	private Color selectedColor;
 	private Color alternatingColor;
@@ -36,9 +40,32 @@ public class AlternatingRowColorListCellRenderer<O> extends JLabel implements Li
 	 * @see #DEFAULT_ALTERNATING_COLOR
 	 * @see #DEFAULT_SELECTED_COLOR
 	 * @see #DEFAULT_BORDER
+	 * @see #DEFAULT_MONOSPACED
 	 */
 	public AlternatingRowColorListCellRenderer(){
-		this(DEFAULT_SELECTED_COLOR, DEFAULT_ALTERNATING_COLOR, DEFAULT_BORDER);
+		this(DEFAULT_MONOSPACED, DEFAULT_SELECTED_COLOR, DEFAULT_ALTERNATING_COLOR, DEFAULT_BORDER);
+	}
+	
+	/**
+	 * Creates a new list cell renderer with default values.
+	 * @see #DEFAULT_ALTERNATING_COLOR
+	 * @see #DEFAULT_SELECTED_COLOR
+	 * @see #DEFAULT_BORDER
+	 */
+	public AlternatingRowColorListCellRenderer(boolean monospaced){
+		this(monospaced, DEFAULT_SELECTED_COLOR, DEFAULT_ALTERNATING_COLOR, DEFAULT_BORDER);
+	}
+	
+	/**
+	 * Creates a new list cell renderer with the given parameters and the default value for monospaced text.
+	 * @param selectedColor The color used for selected rows.
+	 * @param alternatingColor The second color used for alternating row coloring.<br>
+	 * The first color is the background color of the list.
+	 * @param border The border to be used for list entries.
+	 * @see #DEFAULT_MONOSPACED
+	 */
+	public AlternatingRowColorListCellRenderer(Color selectedColor, Color alternatingColor, Border border){
+		this(DEFAULT_MONOSPACED, selectedColor, alternatingColor, border);
 	}
 	
 	/**
@@ -48,13 +75,16 @@ public class AlternatingRowColorListCellRenderer<O> extends JLabel implements Li
 	 * The first color is the background color of the list.
 	 * @param border The border to be used for list entries.
 	 */
-	public AlternatingRowColorListCellRenderer(Color selectedColor, Color alternatingColor, Border border){
+	public AlternatingRowColorListCellRenderer(boolean monospaced, Color selectedColor, Color alternatingColor, Border border){
 		setOpaque(true);
 		setHorizontalAlignment(LEFT);
 		setVerticalAlignment(CENTER);
 		this.selectedColor = selectedColor;
 		this.alternatingColor = alternatingColor;
 		setBorder(border);
+		if(monospaced)
+			setFont(new Font("monospaced", getFont().getStyle(), getFont().getSize()));
+		setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 	}
 
 	@Override
@@ -84,7 +114,8 @@ public class AlternatingRowColorListCellRenderer<O> extends JLabel implements Li
 	}
 	
 	protected String getText(O value){
-		return value.toString();
+		String toStringValue = value.toString();
+		return StringUtils.convertToHTML(toStringValue);
 	}
 
 	protected String getTooltip(O value){

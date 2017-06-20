@@ -3,15 +3,18 @@ package de.invation.code.toval.graphic.dialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
@@ -19,6 +22,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.border.Border;
 
+import de.invation.code.toval.graphic.component.ListWithAccessibleRenderedComponents;
 import de.invation.code.toval.graphic.renderer.AlternatingRowColorListCellRenderer;
 import de.invation.code.toval.validate.ParameterException;
 import de.invation.code.toval.validate.Validate;
@@ -35,8 +39,14 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 	private Collection<O> possibleValues;
 	private int selectionMode;
 	private int minWidth;
-	private JList<O> stringList;
+	private ListWithAccessibleRenderedComponents<O> stringList;
 	private Comparator<O> valueComparator;
+	
+	private Map<Long,KeyEvent> keyEventsByTime = new ConcurrentSkipListMap<>();
+	private String actualSearchString = null;
+	private static final int MAX_STOREGE_TIME_FOR_KEY_EVENTS_IN_MILLIS = 700;
+
+	
 	
 	public ValueChooserDialog(Window owner, String title, Collection<O> possibleValues) throws Exception {
 		super(owner, title);
@@ -114,14 +124,8 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 	@Override
 	protected void setTitle() {}
 	
-	private JList<O> getListValues(){
+	private ListWithAccessibleRenderedComponents<O> getListValues(){
 		if(stringList == null){
-			stringList = new JList<O>(stringListModel);
-			stringList.setCellRenderer(new AlternatingRowColorListCellRenderer<O>());
-			stringList.setFixedCellHeight(20);
-			stringList.setVisibleRowCount(10);
-			stringList.getSelectionModel().setSelectionMode(selectionMode);
-			stringList.setBorder(null);
 			Collection<O> elementsToInsert = possibleValues;
 			if(getValueComparator() != null){
 				List<O> sortedList = new ArrayList<>(possibleValues);
@@ -131,8 +135,48 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 			for(O possibleValue: elementsToInsert){
 				stringListModel.addElement(possibleValue);
 			}
+			stringList = new ListWithAccessibleRenderedComponents<O>(stringListModel);
+			stringList.setCellRenderer(new AlternatingRowColorListCellRenderer<O>());
+			stringList.setFixedCellHeight(20);
+			stringList.setVisibleRowCount(10);
+			stringList.getSelectionModel().setSelectionMode(selectionMode);
+			stringList.setBorder(null);
+			stringList.addKeyListener(new KeyAdapter() {
+
+				@Override
+				public void keyPressed(KeyEvent e) {
+					updateKeys(e);
+					searchValue();
+				}
+				
+			});
 		}
 		return stringList;
+	}
+	
+	private void updateKeys(KeyEvent keyEvent){
+		long now = System.currentTimeMillis();
+		actualSearchString = null;
+		if(keyEvent.getKeyChar() != '\uFFFF' && keyEvent.getKeyCode() != KeyEvent.VK_DELETE)
+			keyEventsByTime.put(now, keyEvent);
+		StringBuilder builder = new StringBuilder();
+		for(Long time: keyEventsByTime.keySet()){
+			if(now - time > MAX_STOREGE_TIME_FOR_KEY_EVENTS_IN_MILLIS){
+				keyEventsByTime.remove(time);
+			} else {
+				builder.append(keyEventsByTime.get(time).getKeyChar());
+			}
+		}
+		actualSearchString = builder.toString().toLowerCase();
+	}
+	
+	private void searchValue() {
+		for(int i=0; i<getListValues().getModel().getSize(); i++){
+			if(getListValues().getStringRepOfRenderedComponentAtIndex(i).toLowerCase().startsWith(actualSearchString)){
+				getListValues().setSelectedIndex(i);
+				break;
+			}
+		}
 	}
 	
 	public void setListCellRenderer(ListCellRenderer<? super O> renderer){
@@ -156,9 +200,9 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 		dialog.setUpGUI();
 		return dialog.getDialogObject();
 	}
-//	
+	
 //	public static void main(String[] args) throws Exception {
-//		ValueChooserDialog.showDialog(null, "Test", Arrays.asList("1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"));
+//		ValueChooserDialog.showDialog(null, "Test", Arrays.asList("Gerd", "Hans", "Idefix", "Insel", "Isolde", "Kurt"));
 //	}
 	
 }

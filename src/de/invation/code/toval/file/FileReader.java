@@ -91,9 +91,13 @@ public class FileReader {
 		System.setProperty("line.separator", systemLineSeparatorBackup);
 	}
 	
+	public BufferedReader getReader() {
+		return input;
+	}
 	
 	//------- Functionality ------------------------------------------------------------------
 	
+
 	public String readLine() throws IOException{
 		return input.readLine();
 	}
@@ -104,12 +108,12 @@ public class FileReader {
 	}
 	
 	
-	public static void main(String[] args) throws Exception{
-		FileReader reader = new FileReader("NewFile.txt", Charset.forName("MacRoman"));
-		String nextLine;
-		while((nextLine = reader.readLine()) != null){
-			System.out.println(nextLine);
-		}
-	}
+//	public static void main(String[] args) throws Exception{
+//		FileReader reader = new FileReader("NewFile.txt", Charset.forName("MacRoman"));
+//		String nextLine;
+//		while((nextLine = reader.readLine()) != null){
+//			System.out.println(nextLine);
+//		}
+//	}
 
 }
