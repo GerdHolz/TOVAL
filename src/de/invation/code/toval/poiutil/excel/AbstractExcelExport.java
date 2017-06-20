@@ -52,12 +52,11 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
 import org.openxmlformats.schemas.drawingml.x2006.chart.STDispBlanksAs;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 
+import de.invation.code.toval.file.IFileExporter;
 import de.invation.code.toval.misc.StringUtils;
 import de.invation.code.toval.time.TimeScale;
 import de.invation.code.toval.time.TimeValue;
 import de.invation.code.toval.validate.Validate;
-import de.markant.adonis.export.IFileExporter;
-import de.markant.adonis.meta.quality.checker.element.EQPC_ForbiddenAttributes;
 
 public abstract class AbstractExcelExport implements IFileExporter {
 	

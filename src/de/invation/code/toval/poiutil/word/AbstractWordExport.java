@@ -25,8 +25,8 @@ import org.apache.poi.xwpf.usermodel.XWPFTableCell.XWPFVertAlign;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 import de.invation.code.toval.file.FileUtils;
+import de.invation.code.toval.file.IFileExporter;
 import de.invation.code.toval.validate.Validate;
-import de.markant.adonis.export.IFileExporter;
 
 public abstract class AbstractWordExport implements IFileExporter{
 	
