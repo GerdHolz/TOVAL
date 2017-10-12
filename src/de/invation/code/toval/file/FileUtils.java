@@ -82,19 +82,35 @@ public class FileUtils {
 			openFile(file);
 	}
 
-    public static List<File> getFilesInDirectory(String directory) throws IOException {
-        return getFilesInDirectory(directory, null);
+	public static List<File> getFilesInDirectory(String directory) throws IOException {
+		return getFilesInDirectory(directory, false);
+	}
+	
+    public static List<File> getFilesInDirectory(String directory, boolean recursive) throws IOException {
+        return getFilesInDirectory(directory, null, recursive);
+    }
+    
+    public static List<File> getFilesInDirectory(String directory, String acceptedEnding) throws IOException {
+    	return getFilesInDirectory(directory, acceptedEnding, false);
     }
 
-    public static List<File> getFilesInDirectory(String directory, String acceptedEnding) throws IOException {
-        return getFilesInDirectory(directory, true, true, acceptedEnding);
+    public static List<File> getFilesInDirectory(String directory, String acceptedEnding, boolean recursive) throws IOException {
+        return getFilesInDirectory(directory, true, true, acceptedEnding, recursive);
     }
 
     public static List<File> getFilesInDirectory(String directory, boolean onlyFiles, boolean onlyVisibleFiles, final String acceptedEnding) throws IOException {
-        return getFilesInDirectory(directory, onlyFiles, onlyVisibleFiles, new HashSet<>(Arrays.asList(acceptedEnding)));
+    	return getFilesInDirectory(directory, onlyFiles, onlyVisibleFiles, acceptedEnding, false);
+    }
+    
+    public static List<File> getFilesInDirectory(String directory, boolean onlyFiles, boolean onlyVisibleFiles, final String acceptedEnding, boolean recursive) throws IOException {
+        return getFilesInDirectory(directory, onlyFiles, onlyVisibleFiles, new HashSet<>(Arrays.asList(acceptedEnding)), recursive);
+    }
+    
+    public static List<File> getFilesInDirectory(String directory, boolean onlyFiles, boolean onlyVisibleFiles, final Set<String> acceptedEndings) throws IOException {
+    	return getFilesInDirectory(directory, onlyFiles, onlyVisibleFiles, acceptedEndings, false);
     }
 
-    public static List<File> getFilesInDirectory(String directory, boolean onlyFiles, boolean onlyVisibleFiles, final Set<String> acceptedEndings) throws IOException {
+    public static List<File> getFilesInDirectory(String directory, boolean onlyFiles, boolean onlyVisibleFiles, final Set<String> acceptedEndings, boolean recursive) throws IOException {
 //		if(!dir.exists())
 //			throw new ParameterException(ErrorCode.INCOMPATIBILITY, "Invalid or non-existing file path.");
 //		if(!dir.isDirectory())
@@ -103,9 +119,19 @@ public class FileUtils {
         File dir = Validate.directory(directory);
 
         List<File> result = new ArrayList<>();
-        File[] files = dir.listFiles(new FilenameFilter() {
+        List<File> subDirectories = new ArrayList<>();
+        File[] filesInDirectory = dir.listFiles(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String fileName) {
+            	File fileInDirectory = new File(dir, fileName);
+            	if(!fileInDirectory.isFile()){
+            		if(fileInDirectory.isDirectory())
+            			subDirectories.add(fileInDirectory);
+            		return !onlyFiles;
+            	}
+            	if(fileInDirectory.isHidden() && onlyVisibleFiles)
+            		return false;
+            	
                 if (acceptedEndings != null && !acceptedEndings.isEmpty()) {
                     boolean hasAcceptedEnding = false;
                     for (String acceptedEnding : acceptedEndings) {
@@ -120,14 +146,11 @@ public class FileUtils {
                 }
             }
         });
-        for (int i = 0; files != null && i < files.length; i++) {
-            if (onlyFiles && !files[i].isFile()) {
-                continue;
-            }
-            if (onlyVisibleFiles && files[i].isHidden()) {
-                continue;
-            }
-            result.add(files[i]);
+        result.addAll(Arrays.asList(filesInDirectory));
+        if(recursive){
+        	for(File subDirectory: subDirectories){
+        		result.addAll(getFilesInDirectory(subDirectory.getAbsolutePath(), onlyFiles, onlyVisibleFiles, acceptedEndings, recursive));
+        	}
         }
         return result;
     }
