@@ -14,9 +14,6 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.apache.logging.log4j.core.config.AppendersPlugin;
-
-import de.invation.code.toval.graphic.dialog.AbstractDialog;
 import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.os.OSType;
 import de.invation.code.toval.os.OSUtils;
@@ -30,6 +27,7 @@ public abstract class ApplicationFrame extends JFrame {
 	public static final boolean DEFAULT_STACK_TRACE_OPTION_IN_EXCEPTION_DIALOG = true;
 	public static final boolean DEFAULT_CONCAT_CAUSE_MESSAGES_IN_EXCEPTION_DIALOG = true;
 	public static final String DEFAULT_EXCEPTION_DIALOG_TITLE = "Exception";
+	public static final boolean DEFAULT_INCLUDE_MENU_BAR = true;
 	
 	private JPanel 			pnlContent 		= null;
 	private JComponent 		compTop 		= null;
@@ -73,7 +71,9 @@ public abstract class ApplicationFrame extends JFrame {
 		this.setVisible(true);	
 	}
 	
-	protected abstract boolean includesMenuBar();
+	protected boolean includesMenuBar(){
+		return DEFAULT_INCLUDE_MENU_BAR;
+	}
 	
 	protected JMenuBar createMenuBar() throws Exception {
 		return new JMenuBar();
