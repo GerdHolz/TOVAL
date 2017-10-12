@@ -52,6 +52,7 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
 import org.openxmlformats.schemas.drawingml.x2006.chart.STDispBlanksAs;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 
+import de.invation.code.toval.file.FileUtils;
 import de.invation.code.toval.file.IFileExporter;
 import de.invation.code.toval.misc.StringUtils;
 import de.invation.code.toval.time.TimeScale;
@@ -584,6 +585,11 @@ public abstract class AbstractExcelExport implements IFileExporter {
 		return result;
 	}
 	
+	@Override
+	public String getFileName() {
+		return FileUtils.getFile(getOutputFile());
+	}
+
 	protected enum CellType {
 		REGULAR, HEADING;
 	}
