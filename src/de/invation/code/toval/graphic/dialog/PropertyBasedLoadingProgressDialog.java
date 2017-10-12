@@ -51,15 +51,19 @@ public class PropertyBasedLoadingProgressDialog extends JDialog implements Prope
 	private JPanel getPanelBars(){
 		if(panelBars == null){
 			panelBars = new JPanel(new SpringLayout());
-			panelBars.add(new JLabel("Task:", SwingConstants.LEADING));
-			panelBars.add(getTextFieldTask());
-			panelBars.add(new JLabel("Step:", SwingConstants.LEADING));
-			panelBars.add(getTextFieldStep());
-			panelBars.add(new JLabel("Progress:"));
-			panelBars.add(getProgressBarStep());
-			SpringUtilities.makeCompactGrid(panelBars, 3, 2, 10, 10, 10, 10);
+			fillAndLayoutPanelBars();
 		}
 		return panelBars;
+	}
+	
+	private void fillAndLayoutPanelBars(){
+		panelBars.add(new JLabel("Task:", SwingConstants.LEADING));
+		panelBars.add(getTextFieldTask());
+		panelBars.add(new JLabel("Step:", SwingConstants.LEADING));
+		panelBars.add(getTextFieldStep());
+		panelBars.add(new JLabel("Progress:"));
+		panelBars.add(getProgressBarStep());
+		SpringUtilities.makeCompactGrid(panelBars, 3, 2, 10, 10, 10, 10);
 	}
 	
 	private JTextField getTextFieldTask(){
@@ -91,10 +95,20 @@ public class PropertyBasedLoadingProgressDialog extends JDialog implements Prope
 	
 	public void setTask(String task){
 		getTextFieldTask().setText(task);
+		panelBars.removeAll();
+		fillAndLayoutPanelBars();
+		invalidate();
+		pack();
+		repaint();
 	}
 	
 	public void setStep(String step){
 		getTextFieldStep().setText(step);
+		panelBars.removeAll();
+		fillAndLayoutPanelBars();
+		invalidate();
+		pack();
+		repaint();
 	}
 	
 	public void setStepProgress(int stepProgress){
@@ -139,7 +153,7 @@ public class PropertyBasedLoadingProgressDialog extends JDialog implements Prope
 			Thread.sleep(1000);
 			notifyStepAction("Teststep 2 -sfsfd-sdf-sdfsfd-sd-f-sdf-s-df-s-df-s-df--s-dgf-d-fg-d-fg-d-fg--dfg");
 			notifyStepProgress(40);
-			Thread.sleep(5000);
+			Thread.sleep(2000);
 			notifyStepAction("Teststep 3");
 			notifyStepProgress(60);
 			Thread.sleep(1000);
