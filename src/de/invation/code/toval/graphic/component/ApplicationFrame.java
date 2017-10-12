@@ -2,6 +2,8 @@ package de.invation.code.toval.graphic.component;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
@@ -12,6 +14,9 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import org.apache.logging.log4j.core.config.AppendersPlugin;
+
+import de.invation.code.toval.graphic.dialog.AbstractDialog;
 import de.invation.code.toval.graphic.dialog.ExceptionDialog;
 import de.invation.code.toval.os.OSType;
 import de.invation.code.toval.os.OSUtils;
@@ -59,13 +64,16 @@ public abstract class ApplicationFrame extends JFrame {
 		setTitle(getToolName());
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getPanelContent(), BorderLayout.CENTER);
-		setJMenuBar(createMenuBar());
+		if(includesMenuBar())
+			setJMenuBar(createMenuBar());
 		componentsAdded();
 
 		pack();
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);	
 	}
+	
+	protected abstract boolean includesMenuBar();
 	
 	protected JMenuBar createMenuBar() throws Exception {
 		return new JMenuBar();
@@ -214,6 +222,20 @@ public abstract class ApplicationFrame extends JFrame {
             @Override
             public void windowActivated(WindowEvent e) {
             	procedureWindowActivated();
+            }
+        });
+        
+        addComponentListener(new ComponentAdapter() {
+            public void componentResized(ComponentEvent e) {
+                Dimension d = ApplicationFrame.this.getSize();
+                Dimension minD = ApplicationFrame.this.getMinimumSize();
+                if (d.width < minD.width) {
+                    d.width = minD.width;
+                }
+                if (d.height < minD.height) {
+                    d.height = minD.height;
+                }
+                ApplicationFrame.this.setSize(d);
             }
         });
     }
