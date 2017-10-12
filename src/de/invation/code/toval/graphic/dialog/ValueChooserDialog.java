@@ -43,8 +43,9 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 	private Comparator<O> valueComparator;
 	
 	private Map<Long,KeyEvent> keyEventsByTime = new ConcurrentSkipListMap<>();
-	private String actualSearchString = null;
 	private static final int MAX_STOREGE_TIME_FOR_KEY_EVENTS_IN_MILLIS = 700;
+	
+	private long lastTimestamp = 1L;
 
 	
 	
@@ -145,8 +146,12 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 
 				@Override
 				public void keyPressed(KeyEvent e) {
-					updateKeys(e);
-					searchValue();
+					if(e.getWhen() == lastTimestamp)
+						return;
+					lastTimestamp = e.getWhen();
+					String searchString = updateKeys(e);
+					if(searchString != null)
+						searchValue(searchString);
 				}
 				
 			});
@@ -154,11 +159,16 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 		return stringList;
 	}
 	
-	private void updateKeys(KeyEvent keyEvent){
+	private String updateKeys(KeyEvent keyEvent){
+		if(			keyEvent.getKeyChar() == '\uFFFF' 
+				|| 	keyEvent.getKeyCode() == KeyEvent.VK_DELETE 
+				||	keyEvent.getKeyCode() == KeyEvent.VK_ALT
+				||	keyEvent.getKeyCode() == KeyEvent.VK_ALT_GRAPH
+				||	keyEvent.getKeyCode() == KeyEvent.VK_CONTROL)
+			return null;
+			
 		long now = System.currentTimeMillis();
-		actualSearchString = null;
-		if(keyEvent.getKeyChar() != '\uFFFF' && keyEvent.getKeyCode() != KeyEvent.VK_DELETE)
-			keyEventsByTime.put(now, keyEvent);
+		keyEventsByTime.put(now, keyEvent);
 		StringBuilder builder = new StringBuilder();
 		for(Long time: keyEventsByTime.keySet()){
 			if(now - time > MAX_STOREGE_TIME_FOR_KEY_EVENTS_IN_MILLIS){
@@ -167,13 +177,15 @@ public class ValueChooserDialog<O> extends AbstractDialog<List<O>> {
 				builder.append(keyEventsByTime.get(time).getKeyChar());
 			}
 		}
-		actualSearchString = builder.toString().toLowerCase();
+		return builder.toString().toLowerCase();
 	}
 	
-	private void searchValue() {
+	private void searchValue(String searchString) {
 		for(int i=0; i<getListValues().getModel().getSize(); i++){
-			if(getListValues().getStringRepOfRenderedComponentAtIndex(i).toLowerCase().startsWith(actualSearchString)){
-				getListValues().setSelectedIndex(i);
+			if(getListValues().getStringRepOfRenderedComponentAtIndex(i).toLowerCase().startsWith(searchString)){
+				getListValues().addSelectionInterval(i,i);
+//				getListValues().setSelectedIndex(i);
+				getListValues().ensureIndexIsVisible(i);
 				break;
 			}
 		}

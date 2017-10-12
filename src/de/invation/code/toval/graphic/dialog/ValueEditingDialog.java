@@ -28,7 +28,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import de.invation.code.toval.graphic.renderer.AlternatingRowColorListCellRenderer;
-import de.invation.code.toval.misc.CollectionUtils;
 import de.invation.code.toval.validate.Validate;
 
 public class ValueEditingDialog<O> extends AbstractDialog<List<O>> {
