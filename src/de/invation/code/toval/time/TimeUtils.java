@@ -1,7 +1,6 @@
 package de.invation.code.toval.time;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,6 +11,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import de.invation.code.toval.misc.RandomUtils;
+import de.invation.code.toval.validate.ParameterException;
 import de.invation.code.toval.validate.Validate;
 
 public class TimeUtils {
@@ -196,6 +197,43 @@ public class TimeUtils {
 		return lastDayOfMonth(year, 2 + (quarter-1)*3);
 	}
 	
+	public static Date firstDayOfActualWeek(){
+		return firstDayOfActualWeek(Calendar.getInstance().getFirstDayOfWeek());
+	}
+	
+	public static Date firstDayOfActualWeek(int firstDayOfWeek){
+		return firstDayOfWeek(today(), firstDayOfWeek);
+	}
+	
+	public static Date firstDayOfWeek(Date date, int firstDayOfWeek){
+		return getDayOfWeek(date, firstDayOfWeek, firstDayOfWeek);
+	}
+	
+	public static Date lastDayOfActualWeek(){
+		return lastDayOfActualWeek(Calendar.getInstance().getFirstDayOfWeek());
+	}
+	
+	public static Date lastDayOfActualWeek(int firstDayOfWeek){
+		return lastDayOfWeek(today(), firstDayOfWeek);
+	}
+	
+	public static Date lastDayOfWeek(Date date, int firstDayOfWeek){
+		return futureFromDate(firstDayOfWeek(date, firstDayOfWeek), new TimeValue(6, TimeScale.DAYS), false);
+	}
+	
+	public static Date getDayOfWeek(Date date, int weekday){
+		return getDayOfWeek(date, weekday, -1);
+	}
+	
+	public static Date getDayOfWeek(Date date, int weekday, int firstDayOfWeek){
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		if(firstDayOfWeek == -1)
+			cal.setFirstDayOfWeek(firstDayOfWeek);
+		cal.set(Calendar.DAY_OF_WEEK, weekday);
+		return cal.getTime();
+	}
+	
 	public static Date firstDayOfActualMonth(){
 		Calendar cal = Calendar.getInstance();
 		return firstDayOfMonth(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
@@ -339,6 +377,71 @@ public class TimeUtils {
         return java.util.Date.from(((ZonedDateTime) date).toInstant());
     }
 	
+	/**
+	 * @param dateStart
+	 * @param dateEnd
+	 * @param precision {@link Calendar#DAY_OF_YEAR}, {@link Calendar#HOUR_OF_DAY}, {@link Calendar#MINUTE}, {@link Calendar#SECOND}, {@link Calendar#MILLISECOND}, 
+	 * @return
+	 */
+	public static Date randomDateBetween(Date dateStart, Date dateEnd, int precision){
+		Validate.notNull(dateStart);
+		Validate.notNull(dateEnd);
+		if(!dateStart.before(dateEnd))
+			throw new ParameterException("Start date is not before end date");
+		if(precision != Calendar.DAY_OF_YEAR && precision != Calendar.HOUR_OF_DAY && precision != Calendar.MINUTE && precision != Calendar.SECOND && precision != Calendar.MILLISECOND)
+			throw new ParameterException("Unexpected precision");
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(dateStart);
+		int yearStart = calendar.get(Calendar.YEAR);
+		int dayOfYearStart = calendar.get(Calendar.DAY_OF_YEAR);
+		calendar.setTime(dateEnd);
+		int yearEnd = calendar.get(Calendar.YEAR);
+		int dayOfYearEnd = calendar.get(Calendar.DAY_OF_YEAR);
+		int year = 0;
+		int dayOfYear = 0;
+		if(yearStart == yearEnd) {
+			year = yearStart;
+			dayOfYear = RandomUtils.randomIntBetween(dayOfYearStart, dayOfYearEnd + 1);
+		} else {
+			year = RandomUtils.randomIntBetween(yearStart, yearEnd + 1);
+			calendar.setTime(lastDayOfYear(year));
+			int numDaysInYear = calendar.get(Calendar.DAY_OF_YEAR);
+			if(year == yearStart){
+				while((dayOfYear = RandomUtils.randomIntBetween(1, numDaysInYear + 1)) < dayOfYearStart){}
+			} else if(year == yearEnd){
+				while((dayOfYear = RandomUtils.randomIntBetween(1, numDaysInYear + 1)) > dayOfYearEnd){}
+			}
+		}
+		calendar.set(Calendar.YEAR, year);
+		calendar.set(Calendar.DAY_OF_YEAR, dayOfYear);
+		
+		setValues(calendar, 0, 0, 0, 0);
+		if(precision == Calendar.DAY_OF_YEAR)
+			return calendar.getTime();
+		
+		do {
+			switch(precision){
+			case Calendar.MILLISECOND:
+				calendar.set(Calendar.MILLISECOND, RandomUtils.randomIntBetween(0, 1000));
+			case Calendar.SECOND:
+				calendar.set(Calendar.SECOND, RandomUtils.randomIntBetween(0, 60));
+			case Calendar.MINUTE:
+				calendar.set(Calendar.MINUTE, RandomUtils.randomIntBetween(0, 60));
+			case Calendar.HOUR_OF_DAY:
+				calendar.set(Calendar.HOUR_OF_DAY, RandomUtils.randomIntBetween(0, 24));
+			}
+		} while(calendar.getTime().before(dateStart) || calendar.getTime().after(dateEnd));
+		return calendar.getTime();
+	}
+	
+	private static void setValues(Calendar calendar, int hour, int minute, int second, int millisecond){
+		calendar.set(Calendar.HOUR_OF_DAY, hour);
+		calendar.set(Calendar.MINUTE, minute);
+		calendar.set(Calendar.SECOND, second);
+		calendar.set(Calendar.MILLISECOND, millisecond);
+	}
+	
 	public static void main(String[] args) throws ParseException {
 //		System.out.println(tomorrow());
 //		System.out.println(yesterday());
@@ -378,9 +481,13 @@ public class TimeUtils {
 //		System.out.println(quarterEnd(2017, 3));
 //		System.out.println(quarterEnd(2017, 4));
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+//		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+//		
+//		System.out.println(Calendar.getInstance().getFirstDayOfWeek());
+//		System.out.println(firstDayOfWeek(today(), Calendar.getInstance().getFirstDayOfWeek()));
+//		System.out.println(lastDayOfWeek(today(), Calendar.getInstance().getFirstDayOfWeek()));
 		
-		System.out.println(firstDayOfActualMonth());
+		System.out.println(randomDateBetween(today(), lastDayOfActualMonth(), Calendar.MINUTE));
 		
 	}
 
