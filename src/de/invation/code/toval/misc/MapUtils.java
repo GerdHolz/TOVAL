@@ -1,6 +1,6 @@
 package de.invation.code.toval.misc;
 
-import de.invation.code.toval.types.HashList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,9 +40,15 @@ public class MapUtils {
 			throw new NullPointerException();
 		if (map.isEmpty())
 			return EMPTY_MAP;
-		List<Object> v = new HashList<>();
-		v.addAll(map.keySet());
-		v.addAll(map.values());
+		List<Object> keys = new ArrayList<>();
+		List<Object> values = new ArrayList<>();
+		for(Map.Entry<?, ?> entry: map.entrySet()){
+			keys.add(entry.getKey());
+			values.add(entry.getValue());
+		}
+		List<Object> v = new ArrayList<>();
+		v.addAll(keys);
+		v.addAll(values);
 		return String.format(getFormat(map, keyPrecision, valuePrecision), v.toArray());
 	}
 
@@ -68,10 +74,10 @@ public class MapUtils {
 		int c = 0;
 		for (Object key : map.keySet()) {
 			c++;
-			builder.append(FormatUtils.getIndexedFormat(c, FormatUtils.getFormat(key, keyPrecision)));
+			builder.append(FormatUtils.getIndexedFormat(c, FormatUtils.getFormat(key, keyPrecision).substring(1)));
 			builder.append(VALUE_MAPPING);
 			builder.append(
-					FormatUtils.getIndexedFormat(mappings + c, FormatUtils.getFormat(map.get(key), valuePrecision)));
+					FormatUtils.getIndexedFormat(mappings + c, FormatUtils.getFormat(map.get(key), valuePrecision).substring(1)));
 			if (c < mappings)
 				builder.append(VALUE_SEPARATION);
 		}
