@@ -11,7 +11,7 @@ import java.util.Set;
 public class Allocation {
 	
 	private final Map<Object, Set<Object>> exclusions = new HashMap<>();
-	private final Map<Object, ArrayList<Object>> mapping = new HashMap<>();
+	private final Map<Object, List<Object>> mapping = new HashMap<>();
 	private final Map<Object, Integer> insertStat = new HashMap<>();
 	private final Object[] subjects;
 	private final Object[] objects;
@@ -42,7 +42,7 @@ public class Allocation {
 		return result;
 	}
 	
-	public Map<Object, ArrayList<Object>> getMapping(){
+	public Map<Object, List<Object>> getMapping(){
 		mapping.clear();
 		insertStat.clear();
 		Object nextObject;
@@ -59,7 +59,7 @@ public class Allocation {
 				boolean inserted = false;
 				for(Object nextKey: possibleObjects)
 					if(!inserted) {
-						ArrayList<Object> valueList = mapping.get(nextKey);
+						List<Object> valueList = mapping.get(nextKey);
 						if(valueList==null) {
 							valueList = new ArrayList<>();
 							mapping.put(nextKey, valueList);
