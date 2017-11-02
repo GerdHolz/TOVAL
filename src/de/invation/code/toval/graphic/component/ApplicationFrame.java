@@ -1,6 +1,7 @@
 package de.invation.code.toval.graphic.component;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -143,23 +144,23 @@ public abstract class ApplicationFrame extends JFrame {
     }
     
     protected JComponent createComponentCenter() throws Exception {
-		return new JPanel(new BorderLayout());
+		return null;
 	}
     
     protected JComponent createComponentTop() throws Exception {
-		return new JPanel(new BorderLayout());
+		return null;
 	}
     
     protected JComponent createComponentBottom() throws Exception {
-		return new JPanel(new BorderLayout());
+		return null;
 	} 
     
     protected JComponent createComponentLeft() throws Exception {
-		return new JPanel(new BorderLayout());
+		return null;
 	}
     
     protected JComponent createComponentRight() throws Exception {
-		return new JPanel(new BorderLayout());
+		return null;
 	}
 	
     protected void setLookAndFeel() {
