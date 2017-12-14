@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -57,6 +59,7 @@ import org.openxmlformats.schemas.drawingml.x2006.chart.CTPlotArea;
 import org.openxmlformats.schemas.drawingml.x2006.chart.STDispBlanksAs;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTSheetProtection;
 
+import de.invation.code.toval.file.FileUtils;
 import de.invation.code.toval.file.IFileExporter;
 import de.invation.code.toval.misc.StringUtils;
 import de.invation.code.toval.time.TimeScale;
@@ -123,6 +126,10 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	public AbstractExcelExport(File outputFile){
 		this.outputFile = outputFile;
 		initialize();
+	}
+	
+	public AbstractExcelExport(String outputFile){
+		this(new File(FileUtils.ensureAbsolutePath(outputFile)));
 	}
 	
 	private void initialize(){
@@ -649,6 +656,35 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	/**
 	 * Adds a line chart to the given sheet.<br>
 	 * @param sheet Sheet where chart is to be added.
+	 * @param xAxis Cell range which contains X axis information.
+	 * @param values Row containing chart values.
+	 * @param nameForValueSeries Name for value series in row.
+	 * @param gapsForNullValues When {@code true}, the line chart will show gaps for {@code null} values within values series; otherwise {@code null} values will be treated as zero.
+	 * @param chartPosition Chart position.
+	 * @throws Exception
+	 */
+	protected void addLineChart(XSSFSheet sheet, Row xAxis, Row values, String nameForValueSeries, boolean gapsForNullValues, CellRangeAddress chartPosition) throws Exception{
+		CellRangeAddress cellRangeXAxis = createCellRange(xAxis);
+		addLineChart(sheet, gapsForNullValues, chartPosition, cellRangeXAxis, createCellRange(values), nameForValueSeries);
+	}
+	
+	/**
+	 * Adds a line chart to the given sheet.<br>
+	 * @param sheet Sheet where chart is to be added.
+	 * @param xAxis Cell range which contains X axis information.
+	 * @param gapsForNullValues When {@code true}, the line chart will show gaps for {@code null} values within values series; otherwise {@code null} values will be treated as zero.
+	 * @param values Rows containing chart values.
+	 * @param names Names for value series in rows.
+	 * @param chartPosition Chart position.
+	 * @throws Exception
+	 */
+	protected void addLineChart(XSSFSheet sheet, Row xAxis, boolean gapsForNullValues, List<Row> values, List<String> names, CellRangeAddress chartPosition) throws Exception{
+		addLineChart(sheet, gapsForNullValues, chartPosition, createCellRange(xAxis), createChartValueSeries(sheet, createCellRanges(values), names));
+	}
+	
+	/**
+	 * Adds a line chart to the given sheet.<br>
+	 * @param sheet Sheet where chart is to be added.
 	 * @param gapsForNullValues When {@code true}, the line chart will show gaps for {@code null} values within values series; otherwise {@code null} values will be treated as zero.
 	 * @param chartPosition Chart position.
 	 * @param xAxis Cell range which contains X axis information.
@@ -668,6 +704,18 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	 * @param valueSeries (Multiple) value series to insert.
 	 */
 	protected void addLineChart(XSSFSheet sheet, boolean gapsForNullValues, CellRangeAddress chartPosition, CellRangeAddress xAxis, ChartValueSeries... valueSeries){
+		addLineChart(sheet, gapsForNullValues, chartPosition, createChartDataSource(sheet, xAxis), Arrays.asList(valueSeries));
+	}
+	
+	/**
+	 * Adds a line chart to the given sheet.<br>
+	 * @param sheet Sheet where chart is to be added.
+	 * @param gapsForNullValues When {@code true}, the line chart will show gaps for {@code null} values within values series; otherwise {@code null} values will be treated as zero.
+	 * @param chartPosition Chart position.
+	 * @param xAxis Cell range which contains X axis information.
+	 * @param valueSeries (Multiple) value series to insert.
+	 */
+	protected void addLineChart(XSSFSheet sheet, boolean gapsForNullValues, CellRangeAddress chartPosition, CellRangeAddress xAxis, Collection<ChartValueSeries> valueSeries){
 		addLineChart(sheet, gapsForNullValues, chartPosition, createChartDataSource(sheet, xAxis), valueSeries);
 	}
 	
@@ -679,7 +727,7 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	 * @param xAxis Cell range in form of chart data source which contains X axis information.
 	 * @param valueSeries (Multiple) value series to insert.
 	 */
-	protected <T> void addLineChart(XSSFSheet sheet, boolean gapsForNullValues, CellRangeAddress chartPosition, ChartDataSource<T> xAxis, ChartValueSeries... valueSeries){
+	protected <T> void addLineChart(XSSFSheet sheet, boolean gapsForNullValues, CellRangeAddress chartPosition, ChartDataSource<T> xAxis, Collection<ChartValueSeries> valueSeries){
 		Drawing drawing = sheet.createDrawingPatriarch();
         ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, chartPosition.getFirstColumn(), chartPosition.getFirstRow(), chartPosition.getLastColumn(), chartPosition.getLastRow());
 
@@ -721,10 +769,27 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	 * @param sheet Sheet of value series.
 	 * @param cellRangeAddress Cell range of value series.
 	 * @param name Name for the value series.
-	 * @return Value series to be used in line chars.
+	 * @return Value series for cell range to be used in line charts.
 	 */
 	protected ChartValueSeries createChartValueSeries(XSSFSheet sheet, CellRangeAddress cellRangeAddress, String name){
 		return new ChartValueSeries(createChartDataSource(sheet, cellRangeAddress), name);
+	}
+	
+	/**
+	 * Creates a value series for line chart creation within a sheet out of a cell range.
+	 * @param sheet Sheet of value series.
+	 * @param cellRangeAddresses Cell ranges of value series.
+	 * @param names Names for the value series.
+	 * @return Value series for all cell ranges to be used in line charts.
+	 */
+	protected List<ChartValueSeries> createChartValueSeries(XSSFSheet sheet, List<CellRangeAddress> cellRangeAddresses, List<String> names){
+		Validate.notEmpty(cellRangeAddresses);
+		Validate.notEmpty(names);
+		Validate.isTrue(cellRangeAddresses.size() == names.size());
+		List<ChartValueSeries> result = new ArrayList<>();
+		for(int i=0; i<cellRangeAddresses.size(); i++)
+			result.add(createChartValueSeries(sheet, cellRangeAddresses.get(i), names.get(i)));
+		return result;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -765,6 +830,49 @@ public abstract class AbstractExcelExport implements IFileExporter {
 	 */
 	protected CellRangeAddress createCellRange(int firstRowIndex, int lastRowIndex, int firstColIndex, int lastColIndex){
 		return new CellRangeAddress(firstRowIndex, lastRowIndex, firstColIndex, lastColIndex);
+	}
+	
+	/**
+	 * Creates a cell range out of a row.
+	 * @param row Row for cell range creation
+	 * @return Cell range for the given row.
+	 */
+	protected CellRangeAddress createCellRange(Row row){
+		return createCellRange(row.getRowNum(), row.getRowNum(), 0, row.getLastCellNum() - 1);
+	}
+	
+	/**
+	 * Creates cell ranges out of rows.
+	 * @param rows Rows for cell range creation
+	 * @return Cell ranges for all given rows.
+	 */
+	protected List<CellRangeAddress> createCellRanges(Collection<Row> rows){
+		List<CellRangeAddress> result = new ArrayList<>();
+		for(Row row: rows)
+			result.add(createCellRange(row));
+		return result;
+	}
+	
+	/**
+	 * Creates a value series for line chart creation within a sheet out of a cell range.
+	 * @param sheet Sheet of value series.
+	 * @param cellRangeAddress Cell range of value series.
+	 * @param name Name for the value series.
+	 * @return Value series for cell range to be used in line charts.
+	 */
+	protected ChartValueSeries createChartValueSeriesFromRow(XSSFSheet sheet, Row row, String name){
+		return createChartValueSeries(sheet, createCellRange(row), name);
+	}
+	
+	/**
+	 * Creates a value series for line chart creation within a sheet out of a cell range.
+	 * @param sheet Sheet of value series.
+	 * @param cellRangeAddresses Cell ranges of value series.
+	 * @param names Names for the value series.
+	 * @return Value series for all cell ranges to be used in line charts.
+	 */
+	protected List<ChartValueSeries> createChartValueSeriesFromRows(XSSFSheet sheet, List<Row> rows, List<String> names){
+		return createChartValueSeries(sheet, createCellRanges(rows), names);
 	}
 	
 	// Row creation
