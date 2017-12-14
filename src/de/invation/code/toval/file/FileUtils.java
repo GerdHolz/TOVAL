@@ -12,6 +12,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +30,16 @@ import de.invation.code.toval.validate.Validate;
 public class FileUtils {
 	
 	public static final boolean DEFAULT_OPEN_STORED_STREAM_FILES = false;
+	
+	public static String ensureAbsolutePath(String file){
+		Path path = Paths.get(file);
+		if(path.isAbsolute())
+			return file;
+	
+		Path base = Paths.get("");
+        Path effectivePath = base.resolve(path).toAbsolutePath();
+	    return effectivePath.normalize().toString();
+	}
 	
 	public static File writeStream(InputStream stream, String outputDirectory, String fileName) throws Exception{
 		return writeStream(stream, new File(outputDirectory), fileName);
@@ -490,4 +502,5 @@ public class FileUtils {
         }
         return linesCount;
     }
+
 }
