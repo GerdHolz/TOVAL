@@ -1,6 +1,7 @@
 package de.invation.code.toval.file;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,32 +87,53 @@ public abstract class DirectoryReader {
 	public void readDirectory(File directory, boolean recursive) throws Exception{
 		log.info("Validating input directory...");
 		Validate.directory(directory);
-		log.info("Getting files in directory...");
-		List<File> filesInDirectory = FileUtils.getFilesInDirectory(directory.getAbsolutePath(), !considerDirectories, !considerInvisibleFiles, acceptedEndings, recursive);
-		log.info("Processing files in directory...");
+		readDirectoryInternal(directory, recursive);
+	}
+	
+	private void readDirectoryInternal(File directory, boolean recursive) throws Exception{
+		log.info("Reading directory '{}'", directory.getName());
+		log.info("Getting directory content...");
+		List<File> filesInDirectory = FileUtils.getFilesInDirectory(directory.getAbsolutePath(), false, !considerInvisibleFiles, acceptedEndings, false);
+		log.info("Processing directory content...");
+		List<File> subDirectories = new ArrayList<>();
 		for(File file: filesInDirectory){
 			if(file.isDirectory()){
-				try {
-					log.info("Processing directory '{}'...", file.getName());
-					processDirectory(file);
-				} catch(Exception e){
-					log.error(e);
-					processingExceptions.put(file, e);
-					if(isStopOnFirstDirectoryProcessingException())
-						throw e;
-				}
+				subDirectories.add(file);
 			}
 			if(file.isFile()){
-				try {
-					log.info("Processing file '{}'...", file.getName());
-					processFile(file);
-				} catch(Exception e){
-					log.error(e);
-					processingExceptions.put(file, e);
-					if(isStopOnFirstFileProcessingException())
-						throw e;
-				}
+				if(considerFiles)
+					processFileInternal(file);
 			}
+		}
+		for(File subDirectory: subDirectories){
+			if(considerDirectories)
+				processDirectoryInternal(subDirectory);
+			if(recursive && readDirectoryContents(subDirectory))
+				readDirectoryInternal(subDirectory, recursive);
+		}
+	}
+	
+	private void processDirectoryInternal(File directory) throws Exception{
+		try {
+			log.info("Processing directory '{}'...", directory.getName());
+			processDirectory(directory);
+		} catch(Exception e){
+			log.error(e);
+			processingExceptions.put(directory, e);
+			if(isStopOnFirstDirectoryProcessingException())
+				throw e;
+		}
+	}
+	
+	private void processFileInternal(File file) throws Exception{
+		try {
+			log.info("Processing file '{}'...", file.getName());
+			processFile(file);
+		} catch(Exception e){
+			log.error(e);
+			processingExceptions.put(file, e);
+			if(isStopOnFirstFileProcessingException())
+				throw e;
 		}
 	}
 	
@@ -121,6 +143,10 @@ public abstract class DirectoryReader {
 	
 	public Set<File> getFilesWithProcessingExceptions(){
 		return processingExceptions.keySet();
+	}
+	
+	protected boolean readDirectoryContents(File directory){
+		return true;
 	}
 	
 	protected void processFile(File file) throws Exception{};
