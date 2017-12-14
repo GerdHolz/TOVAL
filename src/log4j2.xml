@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %-40logger{36} - %msg%n" />
+		</Console>
+		<File name="file-trace" fileName="trace.log" append="false">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %-40logger{36} - %msg%n" />
+		</File>
+		<File name="file-info" fileName="info.log" append="false">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %-40logger{36} - %msg%n" />
+		</File>
+		<File name="file-warn" fileName="warn.log" append="false">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %-40logger{36} - %msg%n" />
+		</File>
+	</Appenders>
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="console" level="info" />
+			<AppenderRef ref="file-trace" level="trace" />
+			<AppenderRef ref="file-warn" level="warn" />
+			<AppenderRef ref="file-info" level="info" />
+		</Root>
+	</Loggers>
+</Configuration>
+
+<!-- TRACE - DEBUG - INFO - WARN - ERROR - FATAL -->
