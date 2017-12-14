@@ -58,6 +58,14 @@ public class RandomUtils {
     public static double randomNegDouble() {
         return -randomPosDouble();
     }
+    
+    /**
+     * Returns a random double value in the range [min;max].
+     *
+     */
+    public static double randomDouble(double min, double max){
+    	return min + (rand.nextDouble() * (max - min));
+    }
 
     /**
      * Returns a random <code>int</code> value out of a specified range
