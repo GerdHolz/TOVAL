@@ -4,3 +4,6 @@
 /dist/
 *.versionsBackup
 *~
+/info.log
+/trace.log
+/warn.log
