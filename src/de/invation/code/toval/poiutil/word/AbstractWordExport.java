@@ -23,6 +23,11 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell.XWPFVertAlign;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTDocument1;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STPageOrientation;
 
 import de.invation.code.toval.file.FileUtils;
 import de.invation.code.toval.file.IFileExporter;
@@ -32,10 +37,12 @@ public abstract class AbstractWordExport implements IFileExporter{
 	
 	private static final Logger log = LogManager.getLogger(AbstractWordExport.class);
 	
-	public static final String DEFAULT_EXPORT_TEMPLATE = "ExportTemplate.dotx";
-	public static final String TEMPLATE_PATH = "/de/markant/adonis/export/word/";
+//	private static final int TOTAL_PAGE_WIDTH = 9200;
 	
-	private static final int TOTAL_PAGE_WIDTH = 9200;
+	private static final long DEFAULT_PAGE_MARGIN_TOP 		= 1417L;	// 2.5cm
+	private static final long DEFAULT_PAGE_MARGIN_BOTTOM 	= 1134L; 	// 2.0cm
+	private static final long DEFAULT_PAGE_MARGIN_LEFT 		= 1417L;	// 2.5cm
+	private static final long DEFAULT_PAGE_MARGIN_RIGHT 	= 1417L;	// 2.5cm
 	
 	private static final short DEFAULT_FONT_HEIGHT_REGULAR = 10;
 	private static final short DEFAULT_ROW_HEIGHT_REGULAR = 400;
@@ -60,13 +67,6 @@ public abstract class AbstractWordExport implements IFileExporter{
 	
 	public static final Integer DEFAULT_ROW_HEIGHT = null;
 	
-	public static final String STYLE_NAME_TITLE = "Titel";
-	public static final String STYLE_NAME_SUBTITLE = "Untertitel";
-	public static final String STYLE_NAME_HEADING_1 = "berschrift1";
-	public static final String STYLE_NAME_HEADING_2 = "berschrift2";
-	public static final String STYLE_NAME_STANDARD = "Standard";
-	public static final String STYLE_NAME_BOLD = "Fett";
-	
 	private static final int DEFAULT_TABLE_ROW_VERTICAL_PADDING = 300;
 	private static final Color DEFAULT_TABLE_HEADER_COLOR = Color.LIGHT_GRAY;
 //	private static final int DEFAULT_TABLE_HEADER_HEIGHT = 500;
@@ -82,42 +82,146 @@ public abstract class AbstractWordExport implements IFileExporter{
 	public static final OutputMode DEFAULT_OUTPUT_MODE = OutputMode.WORD;
 	
 	private static final XWPFVertAlign DEFAULT_ROW_VERTICAL_ALIGNMENT = XWPFVertAlign.CENTER;
+
+	private static final PageOrientation DEFAULT_PAGE_ORIENTATION = PageOrientation.PORTRAIT;
+	private static final PaperSize DEFAULT_PAPER_SIZE = PaperSize.DIN_ISO_A4;
 	
 	private XWPFDocument document;
 	private File outputFile;
 	private OutputMode outputMode = DEFAULT_OUTPUT_MODE;
+	protected CTSectPr sectionPropertiesWholeDocument;
+	
+	private PageOrientation pageOrientation;
+	private PaperSize paperSize;
 	
 	public AbstractWordExport(String outputFile) throws Exception{
-		this(outputFile, DEFAULT_EXPORT_TEMPLATE);
+		this(new File(outputFile));
 	}
 	
 	public AbstractWordExport(File outputFile) throws Exception{
-		this(outputFile, DEFAULT_EXPORT_TEMPLATE);
-	}
-	
-	public AbstractWordExport(String outputFile, String templateFile) throws Exception{
-		this(new File(outputFile), DEFAULT_EXPORT_TEMPLATE);
-	}
-	
-	public AbstractWordExport(File outputFile, String templateFileName) throws Exception{
+		super();
+		
+		if(paperSize == null)
+			paperSize = getDefaultPaperSize();
+		if(pageOrientation == null)
+			pageOrientation = getDefaultOrientation();
+		
 		this.outputFile = outputFile;
 		this.document = new XWPFDocument();
 		
-		File templateFile = null;
-		try {
-			URL url = getClass().getResource(TEMPLATE_PATH.concat(templateFileName));
-			if(url == null)
-				throw new Exception("URL is null.");
-			templateFile = new File(url.getFile());
-		} catch(Exception e){
-			throw new Exception("Unable to set template file", e);
-		}
-		if(!templateFile.exists())
-			throw new Exception("Unable to set template file: File does not exist.");
+		CTDocument1 document = this.document.getDocument();
+		CTBody body = document.getBody();
+		if (!body.isSetSectPr())
+		     body.addNewSectPr();
+		sectionPropertiesWholeDocument = body.getSectPr();
+		if(!sectionPropertiesWholeDocument.isSetPgSz())
+		    sectionPropertiesWholeDocument.addNewPgSz();
+		if(!sectionPropertiesWholeDocument.isSetPgMar())
+			sectionPropertiesWholeDocument.addNewPgMar();
+		if(!sectionPropertiesWholeDocument.isSetPgBorders())
+			sectionPropertiesWholeDocument.addNewPgBorders();
+		
+		setPaperSize(getDefaultPaperSize());
+		setPageOrientation(getDefaultOrientation());
+		
+		CTPageMar pageMar = sectionPropertiesWholeDocument.getPgMar();
+		pageMar.setLeft(BigInteger.valueOf(getPageMarginLeft()));
+		pageMar.setTop(BigInteger.valueOf(getPageMarginTop()));
+		pageMar.setRight(BigInteger.valueOf(getPageMarginRight()));
+		pageMar.setBottom(BigInteger.valueOf(getPageMarginBottom()));
+		
+//		System.out.println(" page margin left: " + pageMar.getLeft());
+//		System.out.println("page margin right: " + pageMar.getRight());
+//		System.out.println("page width: " + getPageWidth());
+	}
+	
+	/**
+	 * Set a file located within a java package as template file (document styles).<br>
+	 * @param packagePath Path of the package where the template file resides.<br>
+	 * The separator character '/' has also to be used as leading and trailing character.
+	 * @param templateFile Name of the template file.
+	 * @throws Exception
+	 */
+	public void setTemplate(String packagePath, String templateFile) throws Exception{
+		setTemplate(getTemplateFileInternal(packagePath, templateFile));
+	}
+
+	public void setTemplate(String templateFile) throws Exception{
+		setTemplate(new File(templateFile));
+	}
+	
+	public void setTemplate(File templateFile) throws Exception{
+		Validate.exists(templateFile);
+		
+//		System.out.println(templateFile.getAbsolutePath());
 		
 		XWPFDocument template = createDocumentFromTemplate(templateFile);
 		XWPFStyles newStyles = this.document.createStyles();
 		newStyles.setStyles(template.getStyle());
+	}
+	
+	public long getPageMarginTop(){
+		return DEFAULT_PAGE_MARGIN_TOP;
+	}
+	
+	public long getPageMarginBottom(){
+		return DEFAULT_PAGE_MARGIN_BOTTOM;
+	}
+	
+	public long getPageMarginLeft(){
+		return DEFAULT_PAGE_MARGIN_LEFT;
+	}
+	
+	public long getPageMarginRight(){
+		return DEFAULT_PAGE_MARGIN_RIGHT;
+	}
+	
+	/**
+	 * Returns the page width without margins.
+	 * @return
+	 */
+	protected long getPageWidth(){
+		return getPaperSize().width_in_points*20 - Math.round((getPageMarginLeft()/20.0) - (getPageMarginRight()/20.0));
+	}
+	
+	/**
+	 * Returns the page height without margins.
+	 * @return
+	 */
+	protected long getPageHeight(){
+		return getPaperSize().width_in_points - getPageMarginTop() - getPageMarginBottom();
+	}
+	
+	public PageOrientation getPageOrientation() {
+		return pageOrientation;
+	}
+
+	public void setPageOrientation(PageOrientation pageOrientation) {
+		this.pageOrientation = pageOrientation;
+		document.getDocument().getBody().getSectPr().getPgSz().setOrient(pageOrientation.getPoiOrientation());
+	}
+
+	public PaperSize getPaperSize() {
+		return paperSize;
+	}
+
+	public void setPaperSize(PaperSize paperSize) {
+		this.paperSize = paperSize;
+		document.getDocument().getBody().getSectPr().getPgSz().setW(BigInteger.valueOf(paperSize.width_in_points * 20));
+		document.getDocument().getBody().getSectPr().getPgSz().setH(BigInteger.valueOf(paperSize.height_in_points * 20));
+	}
+	
+	public void setPaperSize(PaperSize paperSize, PageOrientation pageOrientation) {
+		setPaperSize(paperSize);
+		setPageOrientation(pageOrientation);
+	}
+	
+	protected PaperSize getDefaultPaperSize(){
+		return DEFAULT_PAPER_SIZE;
+	}
+	
+	protected PageOrientation getDefaultOrientation(){
+		return DEFAULT_PAGE_ORIENTATION;
 	}
 	
 	protected int getDefaultTableCellMarginTop(){
@@ -160,11 +264,11 @@ public abstract class AbstractWordExport implements IFileExporter{
 	protected abstract void addContent(XWPFDocument document) throws Exception;
 	
 	protected XWPFParagraph addParagraph(String text, ParagraphAlignment alignment) {
-		return addParagraph(STYLE_NAME_STANDARD, text, alignment);
+		return addParagraph(getStyleNameStandard(), text, alignment);
 	}
 	
 	protected XWPFParagraph addParagraph(String text) {
-		return addParagraph(STYLE_NAME_STANDARD, text);
+		return addParagraph(getStyleNameStandard(), text);
 	}
 	
 	protected XWPFParagraph addParagraph(String style, String text) {
@@ -176,8 +280,12 @@ public abstract class AbstractWordExport implements IFileExporter{
 	}
 	
 	protected XWPFParagraph addTitle(String text, ParagraphAlignment alignment){
-		return addParagraph(STYLE_NAME_TITLE, text, alignment);
+		return addParagraph(getStyleNameTitle(), text, alignment);
 	}
+	
+	protected abstract String getStyleNameTitle();
+	
+	protected abstract String getStyleNameStandard();
 	
 	protected XWPFParagraph addParagraph(String style, String text, ParagraphAlignment alignment) {
 		XWPFParagraph paragraph = document.createParagraph();
@@ -384,10 +492,14 @@ public abstract class AbstractWordExport implements IFileExporter{
 	}
 	
 	public void setColor(XWPFTableCell tableCell, Color color){
-		tableCell.setColor(String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue()));
+		tableCell.setColor(getColorString(color));
+	}
+	
+	protected String getColorString(Color color){
+		return String.format("%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
 	}
 
-	public void setColWidths(XWPFTable table, int[] minWidths, TableColWidthDistributionPolicy distributionPolicy) {
+	public void setColWidths(XWPFTable table, long[] minWidths, TableColWidthDistributionPolicy distributionPolicy) {
 		switch(distributionPolicy){
 		case DISTRIBUTE_OVER_ALL_COLS:
 			setColWidths(table, minWidths, -1);
@@ -401,11 +513,11 @@ public abstract class AbstractWordExport implements IFileExporter{
 		}
 	}
 	
-	public void setColWidths(XWPFTable table, int[] minWidths, int colIndex) {
+	public void setColWidths(XWPFTable table, long[] minWidths, int colIndex) {
 		int totalMinwidth = 0;
-		for(int minWidth: minWidths)
+		for(long minWidth: minWidths)
 			totalMinwidth += minWidth;
-		int extraSpace = TOTAL_PAGE_WIDTH - totalMinwidth;
+		long extraSpace = getPageWidth() - totalMinwidth;
 		if(extraSpace > 0){
 			switch(colIndex){
 			case -1:
@@ -426,7 +538,6 @@ public abstract class AbstractWordExport implements IFileExporter{
 				cell.getCTTc().addNewTcPr().addNewTcW().setW(BigInteger.valueOf(minWidths[j]));
 			}
 		}
-		
 	}
 	
 	public OutputMode getOutputMode() {
@@ -455,6 +566,34 @@ public abstract class AbstractWordExport implements IFileExporter{
 		DISTRIBUTE_OVER_ALL_COLS,
 		EXTRA_SPACE_GOES_TO_FIRST_COL,
 		EXTRA_SPACE_GOES_TO_LAST_COL;
+	}
+	
+	public static File getTemplateFileInternal(String path, String fileName) throws Exception{
+		File templateFile = null;
+		try {
+			URL url = AbstractWordExport.class.getResource(path.concat(fileName));
+			if(url == null)
+				throw new Exception("URL for internal template file is null.");
+			templateFile = new File(url.getFile());
+		} catch(Exception e){
+			throw new Exception("Unable to set internal template file", e);
+		}
+		return templateFile;
+	}
+	
+	public enum PageOrientation {
+		PORTRAIT(STPageOrientation.PORTRAIT), 
+		LANDSCAPE(STPageOrientation.LANDSCAPE);
+		
+		private STPageOrientation.Enum poiOrientation;
+
+		private PageOrientation(STPageOrientation.Enum poiOrientation) {
+			this.poiOrientation = poiOrientation;
+		}
+
+		public STPageOrientation.Enum getPoiOrientation() {
+			return poiOrientation;
+		}
 	}
 
 }

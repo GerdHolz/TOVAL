@@ -37,7 +37,7 @@ public class TestSimpleExcelExport {
 
 	@Test
 	public void test() throws Exception {
-		SimpleExcelExport export = new SimpleExcelExport(new File("test.xlsx"));
+		SimpleExcelExport export = new SimpleExcelExport(new File("C:\\Users\\stockert\\Desktop\\test.xlsx"));
 		export.setLineChartWidth(20);
 		export.addSheet(SHEET_NAME);
 		Row headingRow = export.addHeadingRow(getHeadingRowNames());

@@ -137,6 +137,8 @@ public abstract class AbstractExcelExport implements IFileExporter {
 		setCellFormatDate(DEFAULT_DATE_FORMAT_PATTERN_POI);
 		cellColor.put(CellType.HEADING, DEFAULT_COLOR_HEADING);
 		cellColor.put(CellType.REGULAR, DEFAULT_COLOR_REGULAR);
+		hyperlinkColor.put(CellType.HEADING, DEFAULT_HYPERLINK_COLOR_HEADING);
+		hyperlinkColor.put(CellType.REGULAR, DEFAULT_HYPERLINK_COLOR_REGULAR);
 		rowHeight.put(CellType.HEADING, DEFAULT_ROW_HEIGHT_HEADING);
 		rowHeight.put(CellType.REGULAR, DEFAULT_ROW_HEIGHT_REGULAR);
 		fontHeight.put(CellType.HEADING, DEFAULT_FONT_HEIGHT_HEADING);

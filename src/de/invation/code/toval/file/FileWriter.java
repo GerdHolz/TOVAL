@@ -6,10 +6,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.util.Collection;
 
 import de.invation.code.toval.validate.ParameterException;
-import de.invation.code.toval.validate.Validate;
 import de.invation.code.toval.validate.ParameterException.ErrorCode;
+import de.invation.code.toval.validate.Validate;
 
 
 public class FileWriter {
@@ -362,6 +363,11 @@ public class FileWriter {
 	public synchronized void write(Object obj) throws IOException{
 		prepare();
 		output.write(obj.toString());
+	}
+	
+	public synchronized void writeLines(Collection<?> obj) throws IOException{
+		for(Object object: obj)
+			writeLine(object);
 	}
 	
 	public synchronized void writeLine(Object obj) throws IOException{

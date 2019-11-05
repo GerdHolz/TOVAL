@@ -138,6 +138,13 @@ public class ArrayUtils {
 			result[c++] = i;
 		return result;
 	}
+	
+	public static int[] invertSigns(int[] arr){
+		int[] result = new int[arr.length];
+		for(int i=0; i<arr.length; i++)
+			result[i] = arr[i]*(-1);
+		return result;
+	}
 
 	/**
 	 * Returns a random element of the given array.
@@ -376,13 +383,53 @@ public class ArrayUtils {
 	 *            Value separation character.
 	 * @return String representation of <code>arr</code>
 	 * @see #getFormat(Object[], int, char)
+	 * @see ArrayUtils#DEFAULT_PRECISION
 	 */
 	public static <T> String toString(T[] arr, char valueSeparation) {
 		return toString(arr, DEFAULT_PRECISION, valueSeparation);
 	}
+	
+	/**
+	 * Returns a String representation of an int-array.<br>
+	 * 
+	 * @param arr
+	 *            Array for String representation
+	 * @param valueSeparation
+	 *            Value separation character.
+	 * @return String representation of <code>arr</code>
+	 * @see #toString(Object[], char)
+	 */
+	public static <T> String toString(int[] arr, char valueSeparation) {
+		return toString(Arrays.stream(arr).boxed().toArray(Integer[]::new), valueSeparation);
+	}
 
+	/**
+	 * Returns a String representation of an object-array.<br>
+	 * 
+	 * @param <T>
+	 *            Object array type.
+	 * @param arr
+	 *            Object-array for String representation
+	 * @return String representation of <code>arr</code>
+	 * @see #getFormat(Object[], int, char)
+	 * @see ArrayUtils#DEFAULT_PRECISION
+	 * @see #VALUE_SEPARATION
+	 */
 	public static <T> String toString(T[] arr) {
 		return toString(arr, DEFAULT_PRECISION, VALUE_SEPARATION);
+	}
+	
+	/**
+	 * Returns a String representation of an int-array.<br>
+	 * 
+	 * @param arr Array for String representation
+	 * @return String representation of <code>arr</code>
+	 * @see #toString(Object[])
+	 * @see ArrayUtils#DEFAULT_PRECISION
+	 * @see #VALUE_SEPARATION
+	 */
+	public static String toString(int[] arr) {
+		return toString(Arrays.stream(arr).boxed().toArray(Integer[]::new));
 	}
 
 	/**
@@ -402,10 +449,26 @@ public class ArrayUtils {
 	 * @see #getFormat(Object[], int, char)
 	 */
 	public static <T> String toString(T[] arr, int precision, char valueSeparation) {
-		if (arr.length > 0)
+		if (arr.length > 0){
 			return String.format(getFormat(arr, precision, valueSeparation), arr);
-		else
+		} else {
 			return EMPTY_ARRAY;
+		}
+	}
+	
+	/**
+	 * Returns a String representation of an object-array.<br>
+	 * The specified precision is only applicable for <code>Float</code> and
+	 * <code>Double</code> elements.
+	 * 
+	 * @param arr array for String representation
+	 * @param precision Precision for Float and Double elements.
+	 * @param valueSeparation Value separation character.
+	 * @return String representation of <code>arr</code>
+	 * @see #toString(Object[], int, char)
+	 */
+	public static String toString(int[] arr, int precision, char valueSeparation) {
+		return toString(Arrays.stream(arr).boxed().toArray(Integer[]::new), precision, valueSeparation);
 	}
 
 	/**

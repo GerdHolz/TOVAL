@@ -197,11 +197,14 @@ public class FileUtils {
     }
 
     public static List<File> getSubdirectories(String directory) throws IOException {
-        Validate.directory(directory);
-        File dir = new File(directory);
-        if (!dir.exists()) {
+    	Validate.notNull(directory);
+        return getSubdirectories(new File(directory));
+    }
+    
+    public static List<File> getSubdirectories(File dir) throws IOException {
+        Validate.directory(dir);
+        if (!dir.exists())
             throw new ParameterException(ErrorCode.INCOMPATIBILITY, "Invalid or non-existing directory.");
-        }
 
         List<File> result = new ArrayList<>();
         File[] files = dir.listFiles();

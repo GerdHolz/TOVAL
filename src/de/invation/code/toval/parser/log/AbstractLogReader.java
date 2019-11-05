@@ -10,30 +10,43 @@ import java.util.regex.Pattern;
 import de.invation.code.toval.file.FileReader;
 
 public abstract class AbstractLogReader<R extends AbstractLogReadingResult> {
-
-	protected File inputFile;
-	protected R logReadingResult;
-	protected Charset charset = Charset.forName("UTF-8");
-
-	protected AbstractLogReader(File inputFile) throws Exception {
-		this.inputFile = inputFile;
-		this.logReadingResult = createLogReadingResult();
-	}
 	
-	protected AbstractLogReader(File inputFile, Charset charset) throws Exception {
-		this.inputFile = inputFile;
-		this.logReadingResult = createLogReadingResult();
+	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+
+	protected R logReadingResult;
+	protected Charset charset = DEFAULT_CHARSET;
+
+	protected AbstractLogReader() throws Exception {}
+	
+	protected AbstractLogReader(Charset charset) throws Exception {
 		setCharset(charset);
 	}
 	
-	private void setCharset(Charset charset){
-		this.charset = charset;
+	public Charset getCharset() {
+		return charset;
 	}
 
-	public void readFile() throws Exception {
+	public void setCharset(Charset charset){
+		this.charset = charset;
+	}
+	
+	public void readFile(String inputFile) throws Exception {
+		readFile(new File(inputFile));
+	}
+	
+	public void readFile(String inputFile, Charset charset) throws Exception {
+		readFile(new File(inputFile), charset);
+	}
+
+	public void readFile(File inputFile) throws Exception {
+		readFile(inputFile, charset);
+	}
+	
+	public void readFile(File inputFile, Charset charset) throws Exception {
+		logReadingResult = createLogReadingResult();
 		BufferedReader in = null;
 		try {
-			in = new BufferedReader(new FileReader(inputFile.getAbsolutePath(), charset).getReader());
+			in = new BufferedReader(new FileReader(inputFile, charset).getReader());
 			String line = null;
 			int lineNumber = 0;
 			while ((line = in.readLine()) != null) {

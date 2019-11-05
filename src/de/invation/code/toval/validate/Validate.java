@@ -379,10 +379,14 @@ public class Validate {
 	 */
 	public static <T extends Object> void inclusiveBetween(T start, T end, Comparable<T> value, String message)  {
 		if(!validation) return;
-		Validate.notNull(start);
-		Validate.notNull(end);
-		Validate.notNull(value);
-		Validate.notNull(message);
+		try{
+			Validate.notNull(start);
+			Validate.notNull(end);
+			Validate.notNull(value);
+			Validate.notNull(message);
+		} catch(ParameterException e){
+			throw new ParameterException(message);
+		}
 		if(value.compareTo(start) < 0)
 			throw new ParameterException(ErrorCode.RANGEVIOLATION, message);
 		if(value.compareTo(end) > 0)
@@ -1011,6 +1015,32 @@ public class Validate {
 	}
 	
 	/**
+	 * Checks if the given file/directory is readable.<br>
+	 * This method assumes that the given String contains the complete path.
+	 * @param fileName The file/directory name to validate.
+	 * @return A file reference for the given file/directory name.
+	 * @throws ParameterException if the file/directory is not readable.
+	 */
+	public static File readable(String fileName) {
+		Validate.notNull(fileName);
+		Validate.notEmpty(fileName);
+		return Validate.readable(new File(fileName));
+	}
+	
+	/**
+	 * Checks if the given file/directory is readable.
+	 * @param file The file/directory name to validate.
+	 * @return The validated file reference.
+	 * @throws ParameterException if the file/directory is not readable.
+	 */
+	public static File readable(File file) {
+		Validate.notNull(file);
+		if(!file.canRead())
+			throw new ParameterException("\""+file+"\" is not readable!");
+		return file;
+	}
+	
+	/**
 	 * Checks if there is an existing file with the given name.<br>
 	 * This method assumes that the given String contains the complete file path.
 	 * @param fileName The file name (+path) to validate.
@@ -1061,6 +1091,8 @@ public class Validate {
 			throw new ParameterException("\""+file+"\" exists!");
 		return file;
 	}
+	
+	
 	
 	public static final void dateInActualYear(Date date){
 		if(!TimeUtils.inActualYear(date))

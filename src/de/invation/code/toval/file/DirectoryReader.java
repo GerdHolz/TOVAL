@@ -92,18 +92,37 @@ public abstract class DirectoryReader {
 	
 	private void readDirectoryInternal(File directory, boolean recursive) throws Exception{
 		log.info("Reading directory '{}'", directory.getName());
+		if(!readFilesInDirectory(directory) && !readSubdirectoriesInDirectory(directory))
+			return;
 		log.info("Getting directory content...");
-		List<File> filesInDirectory = FileUtils.getFilesInDirectory(directory.getAbsolutePath(), false, !considerInvisibleFiles, acceptedEndings, false);
+		log.debug("Read          files: {}", readFilesInDirectory(directory));
+		log.debug("Read subdirectories: {}", readSubdirectoriesInDirectory(directory));
+		List<File> filesInDirectory = null;
+		if(readFilesInDirectory(directory)){
+			filesInDirectory = FileUtils.getFilesInDirectory(directory.getAbsolutePath(), !readSubdirectoriesInDirectory(directory), !considerInvisibleFiles, acceptedEndings, false);
+		} else if(readSubdirectoriesInDirectory(directory)){
+			filesInDirectory = FileUtils.getSubdirectories(directory);
+		}
+		
 		log.info("Processing directory content...");
+		List<File> regularFiles = new ArrayList<>();
 		List<File> subDirectories = new ArrayList<>();
 		for(File file: filesInDirectory){
 			if(file.isDirectory()){
+				log.debug("Found subdir: {}", file.getName());
 				subDirectories.add(file);
+				continue;
 			}
 			if(file.isFile()){
-				if(considerFiles)
-					processFileInternal(file);
+				log.debug("Found file: {}", file.getName());
+				regularFiles.add(file);
+				continue;
 			}
+		}
+		log.debug("Directory content: {} files, {} sub directories", regularFiles.size(), subDirectories.size());
+		for(File regularFile: regularFiles){
+			if(considerFiles)
+				processFileInternal(regularFile);
 		}
 		for(File subDirectory: subDirectories){
 			if(considerDirectories)
@@ -146,6 +165,14 @@ public abstract class DirectoryReader {
 	}
 	
 	protected boolean readDirectoryContents(File directory){
+		return true;
+	}
+	
+	protected boolean readFilesInDirectory(File directory){
+		return true;
+	}
+	
+	protected boolean readSubdirectoriesInDirectory(File directory){
 		return true;
 	}
 	

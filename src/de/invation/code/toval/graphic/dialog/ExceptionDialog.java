@@ -41,10 +41,10 @@ public class ExceptionDialog extends JDialog {
     private JButton btnOK;
     
     private boolean concatCauseMessages = DEFAULT_CONCAT_CAUSE_MESSAGES;
-    private Exception exception = null;
+    private Throwable exception = null;
     private boolean stackTraceOption = true;
 
-    protected ExceptionDialog(Window owner, String title, Exception exception, boolean concatCauseMessages, boolean stackTraceOption) {
+    protected ExceptionDialog(Window owner, String title, Throwable exception, boolean concatCauseMessages, boolean stackTraceOption) {
         super(owner, title);
         Validate.notNull(exception);
         this.exception = exception;
@@ -151,23 +151,23 @@ public class ExceptionDialog extends JDialog {
         return sw.getBuffer().toString();
     }
 
-    public static void showException(String title, Exception exception) {
+    public static void showException(String title, Throwable exception) {
         showException(title, exception, DEFAULT_CONCAT_CAUSE_MESSAGES);
     }
 
-    public static void showException(String title, Exception exception, boolean concatCauseMessages) {
+    public static void showException(String title, Throwable exception, boolean concatCauseMessages) {
         showException(null, title, exception, concatCauseMessages);
     }
 
-    public static void showException(Window owner, String title, Exception exception) {
+    public static void showException(Window owner, String title, Throwable exception) {
         showException(owner, title, exception, DEFAULT_CONCAT_CAUSE_MESSAGES);
     }
     
-    public static void showException(Window owner, String title, Exception exception, boolean concatCauseMessages) {
+    public static void showException(Window owner, String title, Throwable exception, boolean concatCauseMessages) {
         showException(owner, title, exception, concatCauseMessages, DEFAULT_STACK_TRACE_OPTION);
     }
 
-    public static void showException(Window owner, String title, Exception exception, boolean concatCauseMessages, boolean stackTraceOption) {
+    public static void showException(Window owner, String title, Throwable exception, boolean concatCauseMessages, boolean stackTraceOption) {
         try {
             ExceptionDialog dialog = new ExceptionDialog(owner, title, exception, concatCauseMessages, stackTraceOption);
         } catch (Exception e) {

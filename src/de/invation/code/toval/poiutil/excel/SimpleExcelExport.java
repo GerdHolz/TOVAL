@@ -1,7 +1,6 @@
 package de.invation.code.toval.poiutil.excel;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import de.invation.code.toval.file.FileUtils;
 import de.invation.code.toval.validate.Validate;
 
 public class SimpleExcelExport extends AbstractExcelExport {
@@ -85,7 +83,7 @@ public class SimpleExcelExport extends AbstractExcelExport {
 	}
 	
 	@Override
-	protected XSSFSheet addSheet(String sheetName) throws Exception {
+	public XSSFSheet addSheet(String sheetName) throws Exception {
 		XSSFSheet sheet = super.addSheet(sheetName);
 		rowCount.put(sheetName, 0);
 		colCount.put(sheetName, 0);

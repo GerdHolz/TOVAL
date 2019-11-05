@@ -87,7 +87,6 @@ public abstract class AbstractTypedProperties<P extends Enum<P> & Property> exte
 	public String getPropertyValueAsString(P property, Object value) throws PropertyException {
 		if(value == null)
 			return property.getPropertyCharacteristics().getNullReplacement();
-		
 		try {
 			switch(property.getPropertyCharacteristics().getValueType()){
 			case STRING:
